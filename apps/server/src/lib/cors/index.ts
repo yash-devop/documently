@@ -1,8 +1,6 @@
 import { CorsOptions } from "cors";
 
 export const corsConfig: CorsOptions = {
-  origin: (origin, callback) => {
-    callback(null, true); // reflect request origin
-  },
+  origin: ["http://localhost:3000"],
   credentials: true,
 };
