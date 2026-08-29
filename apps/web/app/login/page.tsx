@@ -19,6 +19,14 @@ export default function LoginPage() {
     });
   };
 
+  const handleGithub = async () => {
+    await authClient.signIn.social({
+      provider: "github",
+      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}`,
+      errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`,
+    });
+  };
+
   const handleEmailSignUp = async () => {
     const data = await authClient.signUp.email({
       name: "",
@@ -35,6 +43,7 @@ export default function LoginPage() {
       <div>
         GOOGLE AUTH
         <button onClick={handleGoogle}> GOOGLE</button>
+        <button onClick={handleGithub}> GITHUB</button>
       </div>
       <br />
 

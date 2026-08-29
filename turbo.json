@@ -21,7 +21,12 @@
         "NEXT_FRONTEND_URL",
         "DATABASE_URL",
         "NODE_ENV",
-        "BETTER_AUTH_SECRET"
+        "BETTER_AUTH_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_API_KEY",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_API_KEY",
+        "FRONTEND_URL"
       ]
     }
   }
