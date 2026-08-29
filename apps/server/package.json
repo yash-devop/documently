@@ -6,7 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "set NODE_ENV=development&& tsx watch src/index.ts",
-    "prod": "set NODE_ENV=production&& tsx watch src/index.ts"
+    "prod": "set NODE_ENV=production&& tsx watch src/index.ts",
+    "prisma:generate": "pnpm prisma generate",
+    "prisma:format": "pnpm prisma format",
+    "prisma:prod": "pnpm prisma migrate deploy",
+    "prisma:dev": "pnpm prisma db push",
+    "prisma:reset": "pnpm prisma migrate reset"
   },
   "keywords": [],
   "author": "",
