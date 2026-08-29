@@ -1,5 +1,5 @@
 {
-  "name": "development",
+  "name": "documently",
   "private": true,
   "scripts": {
     "build": "turbo run build",
