@@ -83,15 +83,6 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
 
-  packages/env:
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
