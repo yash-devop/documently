@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "check-types": "tsc --noEmit",
     "dev": "set NODE_ENV=development&& tsx watch src/index.ts",
     "prod": "set NODE_ENV=production&& tsx watch src/index.ts",
     "prisma:generate": "pnpm prisma generate",
