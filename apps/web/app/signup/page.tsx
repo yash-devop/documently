@@ -21,11 +21,13 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+// import { toast } from "sonner";
 import { z } from "zod";
 import { ContainerWrapper } from "../../components/container-wrapper";
 import { DocumentlySolo } from "../../components/logos/documently-solo";
 import { authClient } from "../../lib/better-auth";
 import { useRouter } from "next/navigation";
+import { toast } from "../../components/toasts/index";
 
 type SignUpValues = z.infer<typeof signupSchema>;
 
@@ -37,6 +39,7 @@ export default function LoginPage() {
   } = useForm<SignUpValues>({
     resolver: zodResolver(signupSchema),
   });
+
   const router = useRouter();
 
   const [isPending, setIsPending] = useState(false);
@@ -61,20 +64,46 @@ export default function LoginPage() {
   const handleEmailSignUp = async (values: SignUpValues) => {
     setIsPending(true);
     try {
-      const { error } = await authClient.signUp.email({
+      const { error, data } = await authClient.signUp.email({
         name: values.name,
         email: values.email,
         password: values.password,
       });
 
       if (error) {
-        console.error("Sign up failed:", error.message);
+        console.log("Err", error);
+        console.log("data", data);
+        toast({
+          type: "error",
+          title: `${error.statusText ?? "Error while signup"} (${error.status})`,
+          description: error.message ?? error.statusText,
+          dismissible: false,
+          action: {
+            label: "Retry",
+            onClick: async () => {
+              setIsPending(true);
+              await handleEmailSignUp(values);
+            },
+          },
+          cancel: {
+            label: "Dismiss",
+            onClick: () => {},
+          },
+        });
         return;
       }
 
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("Unexpected error during sign up:", err);
+      if (data) {
+        toast({
+          type: "success",
+          title: "Account created successfully",
+          description: `Welcome to Documently,  ${data.user.name ?? data.user.email ?? "User"}! Your account is ready to use.`,
+        });
+
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 999);
+      }
     } finally {
       setIsPending(false);
     }

@@ -11,7 +11,6 @@ app.use(express.json());
 app.use(cors(corsConfig));
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api", VersionRouter);
-
 app.listen(8000, () => {
   console.log("serverEnv", serverEnv);
   console.log("Server successfully");
