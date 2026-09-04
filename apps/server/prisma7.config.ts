@@ -3,7 +3,7 @@
 import { defineConfig } from "prisma/config";
 import { serverEnv } from "./src/lib/zod/env";
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: "prisma/",
   migrations: {
     path: "prisma/migrations",
   },

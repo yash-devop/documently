@@ -8,7 +8,12 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "compose:up": "cd apps/server && docker compose --env-file=.env.local up -d",
-    "compose:down": "cd apps/server && docker compose down"
+    "compose:down": "cd apps/server && docker compose down",
+    "prisma:generate": "cd apps/server && pnpm run prisma:generate",
+    "prisma:format": "cd apps/server && pnpm run prisma:format",
+    "prisma:prod": "cd apps/server && pnpm run prisma:prod",
+    "prisma:dev": "cd apps/server && pnpm run prisma:dev",
+    "prisma:reset": "cd apps/server && pnpm run prisma:reset"
   },
   "devDependencies": {
     "prettier": "3.9.6",
