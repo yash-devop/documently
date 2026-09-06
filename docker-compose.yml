@@ -13,9 +13,20 @@ services:
     volumes:
       - "documently_db:/var/lib/postgresql/main"
 
+  redis:
+    image: redis:8.10-alpine
+    container_name: documently_redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
 volumes:
   documently_db:
     external: false
+  redis-data:
+    driver: local
 
 # Equivalent Manual docker spinup :
 

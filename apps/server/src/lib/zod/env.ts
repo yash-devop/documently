@@ -20,6 +20,7 @@ const serverEnvSchema = z.object({
   AWS_S3_ACCESS_KEY: z.string(),
   AWS_S3_SECRET_KEY: z.string(),
   AWS_S3_BUCKET: z.string(),
+  REDIS_URL: z.url(),
 });
 
 export const serverEnv = serverEnvSchema.parse({
@@ -36,4 +37,5 @@ export const serverEnv = serverEnvSchema.parse({
   AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY,
   AWS_S3_SECRET_KEY: process.env.AWS_S3_SECRET_KEY,
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
+  REDIS_URL: process.env.REDIS_URL,
 });
