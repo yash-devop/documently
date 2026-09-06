@@ -1,8 +1,7 @@
 import { Job, Worker } from "bullmq";
-import { serverEnv } from "./lib/schema";
 import { redisClient } from "./lib/redis";
-
-console.log("REDIS SERVER ENVS", serverEnv);
+import { workerEnv } from "@repo/env/workerEnv";
+console.log("REDIS SERVER ENVS", workerEnv);
 // (async () => {
 //   try {
 //     await redisClient.connect();

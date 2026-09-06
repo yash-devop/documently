@@ -1,6 +1,5 @@
+import { workerEnv } from "@repo/env/workerEnv";
 import { Redis } from "ioredis";
-import { serverEnv } from "./schema";
-
-export const redisClient = new Redis(serverEnv.REDIS_URL, {
+export const redisClient = new Redis(workerEnv.REDIS_URL, {
   maxRetriesPerRequest: null,
 });

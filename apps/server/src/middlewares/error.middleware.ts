@@ -1,6 +1,6 @@
+import { Prisma } from "@repo/db";
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { Prisma } from "../lib/prisma-orm";
 
 export const ErrorCodes = [
   "INTERNAL_ERROR",

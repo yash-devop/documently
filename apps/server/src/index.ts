@@ -4,7 +4,7 @@ import express from "express";
 import { auth } from "./lib/better-auth";
 import { corsConfig } from "./lib/cors";
 import { getPresignedUrl } from "./lib/s3/s3";
-import { serverEnv } from "./lib/zod/env";
+import { serverEnv } from "@repo/env/serverEnv";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { VersionRouter } from "./modules/version.routes";
 

@@ -1,7 +1,7 @@
 import { User } from "better-auth";
 import { randomUUID } from "crypto";
 import { DocumentQueue } from "../../lib/bullmq/document-queue";
-import { prisma } from "../../lib/prisma-orm";
+import { prisma } from "@repo/db";
 import { uploadToS3 } from "../../lib/s3/s3";
 import { AppError } from "../../middlewares/error.middleware";
 

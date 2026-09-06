@@ -1,7 +1,8 @@
 import { betterAuth, BetterAuthOptions } from "better-auth";
-import { serverEnv } from "../zod/env";
+serverEnv;
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "../prisma-orm";
+import { prisma } from "@repo/db";
+import { serverEnv } from "@repo/env/serverEnv";
 
 console.log("AUTHHH", serverEnv);
 

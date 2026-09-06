@@ -4,8 +4,8 @@ import {
   S3Client,
   S3ClientConfig,
 } from "@aws-sdk/client-s3";
-import { serverEnv } from "../zod/env";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { serverEnv } from "@repo/env/serverEnv";
 
 const S3Config: S3ClientConfig = {
   region: serverEnv.AWS_REGION,
