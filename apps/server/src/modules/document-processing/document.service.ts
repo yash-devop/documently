@@ -1,7 +1,72 @@
+import { randomUUID } from "crypto";
+import { User } from "better-auth";
+import { uploadToS3 } from "../../lib/s3/s3";
+import { prisma } from "../../lib/prisma-orm";
+import { AppError } from "../../middlewares/error.middleware";
+
 export const DocumentService = {
-  uploadDocuments: (message: string) => {
-    return {
-      message,
-    };
+  uploadDocuments: async (files: Express.Multer.File[], user: User) => {
+    if (files.length === 0) return;
+
+    const userId = user.id;
+
+    const res = await Promise.all(
+      files.map(async (file) => {
+        let documentCreated = false;
+        const documentId = randomUUID();
+        const storageKey = `users/${userId}/${documentId}.pdf`;
+
+        try {
+          const document = await prisma.document.create({
+            data: {
+              id: documentId,
+              userId,
+              originalName: file.originalname,
+              storageKey,
+              mimeType: file.mimetype,
+              size: file.size,
+            },
+          });
+
+          documentCreated = true;
+
+          await uploadToS3({
+            key: storageKey,
+            body: file.buffer,
+            contentType: file.mimetype,
+          });
+
+          await prisma.document.update({
+            data: {
+              status: "READY",
+            },
+            where: {
+              id: documentId,
+            },
+          });
+
+          return {
+            id: documentId,
+            originalName: file.originalname,
+            status: document.status,
+          };
+        } catch (error) {
+          if (documentCreated) {
+            await prisma.document.update({
+              data: {
+                status: "FAILED",
+              },
+              where: {
+                id: documentId,
+              },
+            });
+          }
+
+          throw new AppError("Document upload failed", 400, "FAILED");
+        }
+      }),
+    );
+
+    return res;
   },
 };
