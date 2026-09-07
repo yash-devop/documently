@@ -38,6 +38,9 @@ importers:
       '@repo/env':
         specifier: workspace:^
         version: link:../../packages/env
+      '@repo/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       better-auth:
         specifier: ^1.7.2
         version: 1.7.2(@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(typescript@7.0.2))(mysql2@3.15.3)(next@16.3.2(@types/node@26.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(pg@8.23.0)(prisma@7.10.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -166,12 +169,18 @@ importers:
 
   apps/worker:
     dependencies:
+      '@repo/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@repo/env':
         specifier: workspace:^
         version: link:../../packages/env
       '@repo/typescript-config':
         specifier: workspace:^
         version: link:../../packages/typescript-config
+      '@repo/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       bullmq:
         specifier: ^6.3.4
         version: 6.3.4(ioredis@6.0.0)(pg@8.23.0)
@@ -206,12 +215,19 @@ importers:
 
   packages/env:
     dependencies:
+      '@repo/typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
       zod:
         specifier: ^4.4.3
         version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: 26.3.0
+        version: 26.3.0
 
   packages/eslint-config:
     devDependencies:
@@ -318,6 +334,18 @@ importers:
       typescript:
         specifier: 7.0.2
         version: 7.0.2
+
+  packages/utils:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1126.0
+        version: 3.1126.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.1126.0
+        version: 3.1126.0
+      '@repo/env':
+        specifier: workspace:^
+        version: link:../env
 
 packages:
 

@@ -5,13 +5,13 @@ import {
   S3ClientConfig,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { serverEnv } from "@repo/env/serverEnv";
+import { awsEnv } from "@repo/env/awsEnv";
 
 const S3Config: S3ClientConfig = {
-  region: serverEnv.AWS_REGION,
+  region: awsEnv.AWS_REGION,
   credentials: {
-    accessKeyId: serverEnv.AWS_S3_ACCESS_KEY,
-    secretAccessKey: serverEnv.AWS_S3_SECRET_KEY,
+    accessKeyId: awsEnv.AWS_S3_ACCESS_KEY,
+    secretAccessKey: awsEnv.AWS_S3_SECRET_KEY,
   },
 };
 
@@ -27,7 +27,7 @@ export const uploadToS3 = async ({
   contentType: string;
 }) => {
   const putObject = new PutObjectCommand({
-    Bucket: serverEnv.AWS_S3_BUCKET, // our bucket name
+    Bucket: awsEnv.AWS_S3_BUCKET, // our bucket name
     Key: key, // file name or location inside the bucket.
     Body: body,
     ContentType: contentType,
@@ -38,7 +38,7 @@ export const uploadToS3 = async ({
 
 export async function getPresignedUrl(key: string) {
   const command = new GetObjectCommand({
-    Bucket: serverEnv.AWS_S3_BUCKET,
+    Bucket: awsEnv.AWS_S3_BUCKET,
     Key: key,
   });
 

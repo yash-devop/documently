@@ -24,6 +24,7 @@
     "@prisma/client": "7.10.0",
     "@repo/db": "workspace:^",
     "@repo/env": "workspace:^",
+    "@repo/utils": "workspace:^",
     "better-auth": "^1.7.2",
     "bullmq": "^6.3.4",
     "cors": "^2.8.6",

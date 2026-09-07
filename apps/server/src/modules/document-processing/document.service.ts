@@ -1,8 +1,8 @@
 import { User } from "better-auth";
 import { randomUUID } from "crypto";
 import { DocumentQueue } from "../../lib/bullmq/document-queue";
-import { prisma } from "@repo/db";
-import { uploadToS3 } from "../../lib/s3/s3";
+import { prisma, Prisma } from "@repo/db";
+import { uploadToS3 } from "@repo/utils";
 import { AppError } from "../../middlewares/error.middleware";
 
 export const DocumentService = {
@@ -43,19 +43,11 @@ export const DocumentService = {
               documentId,
             }),
           );
-          // await prisma.document.update({
-          //   data: {
-          //     status: "READY",
-          //   },
-          //   where: {
-          //     id: documentId,
-          //   },
-          // });
 
           return {
             id: documentId,
             originalName: file.originalname,
-            status: document.status,
+            status: document.status as Prisma.DOCUMENT_STATUS,
           };
         } catch (error) {
           if (documentCreated) {

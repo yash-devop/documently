@@ -1,16 +1,8 @@
+import { prisma } from "@repo/db";
+import { getPresignedUrl } from "@repo/utils";
 import { Job, Worker } from "bullmq";
 import { redisClient } from "./lib/redis";
-import { workerEnv } from "@repo/env/workerEnv";
-console.log("REDIS SERVER ENVS", workerEnv);
-// (async () => {
-//   try {
-//     await redisClient.connect();
-//     console.log("YES CONNECTED");
-//   } catch (err) {
-//     console.error("Failed to connect to Redis:", err);
-//     process.exit(1);
-//   }
-// })();
+
 const documentWorker = new Worker(
   "document-queue",
   async (job: Job) => {
@@ -19,6 +11,37 @@ const documentWorker = new Worker(
     };
 
     console.log("PARSED Document Id => ", documentId);
+
+    const document = await prisma.document.findFirst({
+      where: {
+        id: documentId,
+      },
+    });
+
+    if (!document) {
+      // doc not found.
+      console.log("DOCUMENT NOT FOUND");
+      return;
+    }
+
+    // get the pdf .
+
+    try {
+      const url = await getPresignedUrl(document.storageKey);
+
+      console.log("S3 url", url);
+    } catch (error) {
+      console.log("Error in  s3", error);
+    }
+
+    // await prisma.document.update({
+    //   data: {
+    //     status: "READY",
+    //   },
+    //   where: {
+    //     id: documentId,
+    //   },
+    // });
   },
   {
     connection: redisClient,
