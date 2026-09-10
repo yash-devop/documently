@@ -46,3 +46,19 @@ export async function getPresignedUrl(key: string) {
     expiresIn: 60 * 5,
   });
 }
+
+export async function downloadFromS3(key: string): Promise<Buffer> {
+  const command = new GetObjectCommand({
+    Bucket: awsEnv.AWS_S3_BUCKET,
+    Key: key,
+  });
+
+  const response = await s3Client.send(command);
+  const body = await response.Body?.transformToByteArray();
+
+  if (!body) {
+    throw new Error(`No body returned for key: ${key}`);
+  }
+
+  return Buffer.from(body);
+}

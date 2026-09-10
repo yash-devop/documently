@@ -1,6 +1,7 @@
 import { prisma } from "@repo/db";
-import { getPresignedUrl } from "@repo/utils";
+import { downloadFromS3 } from "@repo/utils";
 import { Job, Worker } from "bullmq";
+import { cleanText, pdfParser } from "./lib/pdf-parse";
 import { redisClient } from "./lib/redis";
 
 const documentWorker = new Worker(
@@ -9,39 +10,27 @@ const documentWorker = new Worker(
     const { documentId } = JSON.parse(job.data) as {
       documentId: string;
     };
-
     console.log("PARSED Document Id => ", documentId);
-
-    const document = await prisma.document.findFirst({
+    const document = await prisma.document.findUnique({
       where: {
         id: documentId,
       },
     });
 
     if (!document) {
-      // doc not found.
       console.log("DOCUMENT NOT FOUND");
       return;
     }
 
-    // get the pdf .
-
     try {
-      const url = await getPresignedUrl(document.storageKey);
+      const pdfBuffer = await downloadFromS3(document.storageKey);
+      const parsedPdfText = await pdfParser(pdfBuffer);
+      const cleanPdfText = cleanText(parsedPdfText.text);
 
-      console.log("S3 url", url);
+      console.log("Parsed Data PDF ", cleanPdfText);
     } catch (error) {
       console.log("Error in  s3", error);
     }
-
-    // await prisma.document.update({
-    //   data: {
-    //     status: "READY",
-    //   },
-    //   where: {
-    //     id: documentId,
-    //   },
-    // });
   },
   {
     connection: redisClient,

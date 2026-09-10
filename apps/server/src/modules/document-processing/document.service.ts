@@ -31,16 +31,16 @@ export const DocumentService = {
 
           documentCreated = true;
 
-          await uploadToS3({
-            key: storageKey,
-            body: file.buffer,
-            contentType: file.mimetype,
-          });
+          // await uploadToS3({
+          //   key: storageKey,
+          //   body: file.buffer,
+          //   contentType: file.mimetype,
+          // });
 
           await DocumentQueue.add(
             "process-document",
             JSON.stringify({
-              documentId,
+              documentId: "a20c8eb0-126e-4422-b520-af05d079835e",
             }),
           );
 
