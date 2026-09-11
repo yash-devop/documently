@@ -4,17 +4,29 @@ enum DOCUMENT_STATUS {
   FAILED
 }
 
+enum DOCUMENT_ERROR_CODE {
+  INVALID_JOB_DATA
+  DOCUMENT_NOT_FOUND
+  S3_DOWNLOAD_FAILED
+  PDF_PARSE_FAILED
+  EMBEDDING_FAILED
+  CHUNKING_FAILED
+  SOMETHING_WENT_WRONG
+}
+
 model Document {
-  id           String          @id @default(cuid())
+  id           String               @id @default(cuid())
   userId       String
   mimeType     String
   originalName String
   storageKey   String
   size         Int
-  status       DOCUMENT_STATUS @default(PROCESSING)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt()
-  user         User            @relation(fields: [userId], references: [id])
+  status       DOCUMENT_STATUS      @default(PROCESSING)
+  errorCode    DOCUMENT_ERROR_CODE?
+  errorMessage String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt()
+  user         User                 @relation(fields: [userId], references: [id])
 
   @@map("document")
 }

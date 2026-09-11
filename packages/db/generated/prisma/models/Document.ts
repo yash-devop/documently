@@ -42,6 +42,8 @@ export type DocumentMinAggregateOutputType = {
   storageKey: string | null
   size: number | null
   status: $Enums.DOCUMENT_STATUS | null
+  errorCode: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +56,8 @@ export type DocumentMaxAggregateOutputType = {
   storageKey: string | null
   size: number | null
   status: $Enums.DOCUMENT_STATUS | null
+  errorCode: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +70,8 @@ export type DocumentCountAggregateOutputType = {
   storageKey: number
   size: number
   status: number
+  errorCode: number
+  errorMessage: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,6 +94,8 @@ export type DocumentMinAggregateInputType = {
   storageKey?: true
   size?: true
   status?: true
+  errorCode?: true
+  errorMessage?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +108,8 @@ export type DocumentMaxAggregateInputType = {
   storageKey?: true
   size?: true
   status?: true
+  errorCode?: true
+  errorMessage?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +122,8 @@ export type DocumentCountAggregateInputType = {
   storageKey?: true
   size?: true
   status?: true
+  errorCode?: true
+  errorMessage?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +223,8 @@ export type DocumentGroupByOutputType = {
   storageKey: string
   size: number
   status: $Enums.DOCUMENT_STATUS
+  errorCode: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage: string | null
   createdAt: Date
   updatedAt: Date
   _count: DocumentCountAggregateOutputType | null
@@ -246,6 +260,8 @@ export type DocumentWhereInput = {
   storageKey?: Prisma.StringFilter<"Document"> | string
   size?: Prisma.IntFilter<"Document"> | number
   status?: Prisma.EnumDOCUMENT_STATUSFilter<"Document"> | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.EnumDOCUMENT_ERROR_CODENullableFilter<"Document"> | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -259,6 +275,8 @@ export type DocumentOrderByWithRelationInput = {
   storageKey?: Prisma.SortOrder
   size?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  errorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -275,6 +293,8 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   storageKey?: Prisma.StringFilter<"Document"> | string
   size?: Prisma.IntFilter<"Document"> | number
   status?: Prisma.EnumDOCUMENT_STATUSFilter<"Document"> | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.EnumDOCUMENT_ERROR_CODENullableFilter<"Document"> | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -288,6 +308,8 @@ export type DocumentOrderByWithAggregationInput = {
   storageKey?: Prisma.SortOrder
   size?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  errorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
@@ -308,6 +330,8 @@ export type DocumentScalarWhereWithAggregatesInput = {
   storageKey?: Prisma.StringWithAggregatesFilter<"Document"> | string
   size?: Prisma.IntWithAggregatesFilter<"Document"> | number
   status?: Prisma.EnumDOCUMENT_STATUSWithAggregatesFilter<"Document"> | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.EnumDOCUMENT_ERROR_CODENullableWithAggregatesFilter<"Document"> | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
 }
@@ -319,6 +343,8 @@ export type DocumentCreateInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutDocumentsInput
@@ -332,6 +358,8 @@ export type DocumentUncheckedCreateInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +371,8 @@ export type DocumentUpdateInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutDocumentsNestedInput
@@ -356,6 +386,8 @@ export type DocumentUncheckedUpdateInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -368,6 +400,8 @@ export type DocumentCreateManyInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -379,6 +413,8 @@ export type DocumentUpdateManyMutationInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,6 +427,8 @@ export type DocumentUncheckedUpdateManyInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -403,6 +441,8 @@ export type DocumentCountOrderByAggregateInput = {
   storageKey?: Prisma.SortOrder
   size?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  errorCode?: Prisma.SortOrder
+  errorMessage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -419,6 +459,8 @@ export type DocumentMaxOrderByAggregateInput = {
   storageKey?: Prisma.SortOrder
   size?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  errorCode?: Prisma.SortOrder
+  errorMessage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -431,6 +473,8 @@ export type DocumentMinOrderByAggregateInput = {
   storageKey?: Prisma.SortOrder
   size?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  errorCode?: Prisma.SortOrder
+  errorMessage?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -463,6 +507,14 @@ export type IntFieldUpdateOperationsInput = {
 
 export type EnumDOCUMENT_STATUSFieldUpdateOperationsInput = {
   set?: $Enums.DOCUMENT_STATUS
+}
+
+export type NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput = {
+  set?: $Enums.DOCUMENT_ERROR_CODE | null
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -518,6 +570,8 @@ export type DocumentCreateWithoutUserInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -529,6 +583,8 @@ export type DocumentUncheckedCreateWithoutUserInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -570,6 +626,8 @@ export type DocumentScalarWhereInput = {
   storageKey?: Prisma.StringFilter<"Document"> | string
   size?: Prisma.IntFilter<"Document"> | number
   status?: Prisma.EnumDOCUMENT_STATUSFilter<"Document"> | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.EnumDOCUMENT_ERROR_CODENullableFilter<"Document"> | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
 }
@@ -581,6 +639,8 @@ export type DocumentCreateManyUserInput = {
   storageKey: string
   size: number
   status?: $Enums.DOCUMENT_STATUS
+  errorCode?: $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -592,6 +652,8 @@ export type DocumentUpdateWithoutUserInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -603,6 +665,8 @@ export type DocumentUncheckedUpdateWithoutUserInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -614,6 +678,8 @@ export type DocumentUncheckedUpdateManyWithoutUserInput = {
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumDOCUMENT_STATUSFieldUpdateOperationsInput | $Enums.DOCUMENT_STATUS
+  errorCode?: Prisma.NullableEnumDOCUMENT_ERROR_CODEFieldUpdateOperationsInput | $Enums.DOCUMENT_ERROR_CODE | null
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -628,6 +694,8 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   storageKey?: boolean
   size?: boolean
   status?: boolean
+  errorCode?: boolean
+  errorMessage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -641,6 +709,8 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   storageKey?: boolean
   size?: boolean
   status?: boolean
+  errorCode?: boolean
+  errorMessage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -654,6 +724,8 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   storageKey?: boolean
   size?: boolean
   status?: boolean
+  errorCode?: boolean
+  errorMessage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -667,11 +739,13 @@ export type DocumentSelectScalar = {
   storageKey?: boolean
   size?: boolean
   status?: boolean
+  errorCode?: boolean
+  errorMessage?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "mimeType" | "originalName" | "storageKey" | "size" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "mimeType" | "originalName" | "storageKey" | "size" | "status" | "errorCode" | "errorMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -695,6 +769,8 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     storageKey: string
     size: number
     status: $Enums.DOCUMENT_STATUS
+    errorCode: $Enums.DOCUMENT_ERROR_CODE | null
+    errorMessage: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["document"]>
@@ -1128,6 +1204,8 @@ export interface DocumentFieldRefs {
   readonly storageKey: Prisma.FieldRef<"Document", 'String'>
   readonly size: Prisma.FieldRef<"Document", 'Int'>
   readonly status: Prisma.FieldRef<"Document", 'DOCUMENT_STATUS'>
+  readonly errorCode: Prisma.FieldRef<"Document", 'DOCUMENT_ERROR_CODE'>
+  readonly errorMessage: Prisma.FieldRef<"Document", 'String'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
 }

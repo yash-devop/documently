@@ -838,6 +838,8 @@ export const DocumentScalarFieldEnum = {
   storageKey: 'storageKey',
   size: 'size',
   status: 'status',
+  errorCode: 'errorCode',
+  errorMessage: 'errorMessage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -973,6 +975,20 @@ export type EnumDOCUMENT_STATUSFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'DOCUMENT_STATUS[]'
  */
 export type ListEnumDOCUMENT_STATUSFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DOCUMENT_STATUS[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DOCUMENT_ERROR_CODE'
+ */
+export type EnumDOCUMENT_ERROR_CODEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DOCUMENT_ERROR_CODE'>
+    
+
+
+/**
+ * Reference to a field of type 'DOCUMENT_ERROR_CODE[]'
+ */
+export type ListEnumDOCUMENT_ERROR_CODEFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DOCUMENT_ERROR_CODE[]'>
     
 
 

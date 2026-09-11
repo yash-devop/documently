@@ -9,11 +9,11 @@
     "check-types": "turbo run check-types",
     "compose:up": "cd apps/server && docker compose --env-file=.env.local up -d",
     "compose:down": "cd apps/server && docker compose down",
-    "prisma:generate": "cd apps/server && pnpm run prisma:generate",
-    "prisma:format": "cd apps/server && pnpm run prisma:format",
-    "prisma:prod": "cd apps/server && pnpm run prisma:prod",
-    "prisma:dev": "cd apps/server && pnpm run prisma:dev",
-    "prisma:reset": "cd apps/server && pnpm run prisma:reset"
+    "prisma:generate": "cd packages/db && pnpm prisma generate --config=prisma7.config.ts",
+    "prisma:format": "cd packages/db && pnpm prisma format --config=prisma7.config.ts",
+    "prisma:prod": "cd packages/db && pnpm prisma migrate deploy --config=prisma7.config.ts",
+    "prisma:dev": "cd packages/db && pnpm prisma db push --config=prisma7.config.ts",
+    "prisma:reset": "cd packages/db && pnpm prisma migrate reset --config=prisma7.config.ts"
   },
   "devDependencies": {
     "prettier": "3.9.6",

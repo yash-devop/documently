@@ -37,12 +37,9 @@ export const DocumentService = {
           //   contentType: file.mimetype,
           // });
 
-          await DocumentQueue.add(
-            "process-document",
-            JSON.stringify({
-              documentId: "a20c8eb0-126e-4422-b520-af05d079835e",
-            }),
-          );
+          await DocumentQueue.add("process-document", {
+            documentId,
+          });
 
           return {
             id: documentId,

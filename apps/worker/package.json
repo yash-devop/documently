@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@langchain/textsplitters": "^1.0.1",
     "@repo/db": "workspace:^",
     "@repo/env": "workspace:^",
     "@repo/typescript-config": "workspace:^",

@@ -82,6 +82,8 @@ export const DocumentScalarFieldEnum = {
   storageKey: 'storageKey',
   size: 'size',
   status: 'status',
+  errorCode: 'errorCode',
+  errorMessage: 'errorMessage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
