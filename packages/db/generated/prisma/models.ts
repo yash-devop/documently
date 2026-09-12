@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/DocumentChunk.ts'
 export type * from './models/Document.ts'
 export type * from './models/User.ts'
 export type * from './models/Session.ts'

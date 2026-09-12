@@ -38,11 +38,11 @@ export const DocumentService = {
           // });
 
           await DocumentQueue.add("process-document", {
-            documentId,
+            documentId: "a35da897-569a-47db-bd47-24d5b30ec216",
           });
 
           return {
-            id: documentId,
+            id: "a35da897-569a-47db-bd47-24d5b30ec216",
             originalName: file.originalname,
             status: document.status as Prisma.DOCUMENT_STATUS,
           };

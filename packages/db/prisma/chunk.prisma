@@ -1,0 +1,14 @@
+model DocumentChunk {
+  id         String @id @default(cuid())
+  documentId String
+  content    String
+  chunkIndex Int
+
+  embedding Unsupported("vector")?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  document  Document               @relation(fields: [documentId], references: [id])
+
+  @@index(documentId)
+  @@map("document_chunk")
+}

@@ -1,6 +1,6 @@
-import { prisma } from "@repo/db";
+import { Prisma, prisma } from "@repo/db";
 import { downloadFromS3 } from "@repo/utils";
-import { Job, Worker } from "bullmq";
+import { Job, randomUUID, Worker } from "bullmq";
 import { chunkText } from "./lib/chunk";
 import { NonRetryableError, RetryableError } from "./lib/error";
 import { cleanText, pdfParser } from "./lib/pdf-parse";
@@ -46,8 +46,38 @@ const documentWorker = new Worker(
       }
 
       const chunks = await chunkText(cleanPdfText);
-      const embeddings = await getEmbeddings(chunks);
-      console.log("dims", embeddings.dims);
+
+      // const dbData = chunks.map((chunk, idx) => {
+      //   return {
+      //     chunkIndex: idx,
+      //     content: chunk,
+      //     documentId: documentId ?? "",
+      //   };
+      // });
+
+      const embeddings: number[][] = await getEmbeddings(chunks);
+
+      const values = chunks.map((chunk, idx) => {
+        const vector = `[${embeddings[idx]?.join(",")}]`;
+
+        return Prisma.Prisma.sql`(
+    ${randomUUID()},
+    ${documentId},
+    ${chunk},
+    ${idx},
+    NOW(),
+    NOW(),
+    ${vector}::vector
+  )`;
+      });
+
+      await prisma.$executeRaw`
+  INSERT INTO "document_chunk"
+    ("id", "documentId", "content", "chunkIndex", "createdAt", "updatedAt", "embedding")
+  VALUES ${Prisma.Prisma.join(values, ",")}
+`;
+      console.log("values", values);
+      console.log("length", embeddings.length);
 
       await prisma.document.update({
         where: {

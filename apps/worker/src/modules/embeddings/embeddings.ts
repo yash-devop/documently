@@ -9,7 +9,7 @@ export const getEmbeddings = async (textChunks: string[]) => {
       pooling: "mean",
       normalize: true,
     });
-    return res;
+    return res.tolist();
   } catch (error) {
     if (error instanceof RetryableError) {
       throw error;
