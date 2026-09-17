@@ -38,7 +38,7 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("err", err);
+  console.log("Global Error Catch => ", err);
   if (err instanceof ZodError) {
     return res.json({
       status: 400,

@@ -1,0 +1,20 @@
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model ChatMessage {
+  id     String @id @default(cuid())
+  chatId String
+
+  role    MessageRole
+  message String      @default("")
+
+  chats Chat @relation(fields: [chatId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chatId])
+  @@map("chat_message")
+}

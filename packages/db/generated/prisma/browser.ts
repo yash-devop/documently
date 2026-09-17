@@ -18,6 +18,11 @@ export { Prisma }
 export * as $Enums from './enums.ts'
 export * from './enums.ts';
 /**
+ * Model Chat
+ * 
+ */
+export type Chat = Prisma.ChatModel
+/**
  * Model DocumentChunk
  * 
  */
@@ -27,6 +32,16 @@ export type DocumentChunk = Prisma.DocumentChunkModel
  * 
  */
 export type Document = Prisma.DocumentModel
+/**
+ * Model ChatDocument
+ * 
+ */
+export type ChatDocument = Prisma.ChatDocumentModel
+/**
+ * Model ChatMessage
+ * 
+ */
+export type ChatMessage = Prisma.ChatMessageModel
 /**
  * Model User
  * 

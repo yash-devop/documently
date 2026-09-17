@@ -51,8 +51,11 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Chat: 'Chat',
   DocumentChunk: 'DocumentChunk',
   Document: 'Document',
+  ChatDocument: 'ChatDocument',
+  ChatMessage: 'ChatMessage',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
@@ -73,6 +76,17 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const ChatScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatScalarFieldEnum = (typeof ChatScalarFieldEnum)[keyof typeof ChatScalarFieldEnum]
 
 
 export const DocumentChunkScalarFieldEnum = {
@@ -102,6 +116,26 @@ export const DocumentScalarFieldEnum = {
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const ChatDocumentScalarFieldEnum = {
+  chatId: 'chatId',
+  documentId: 'documentId'
+} as const
+
+export type ChatDocumentScalarFieldEnum = (typeof ChatDocumentScalarFieldEnum)[keyof typeof ChatDocumentScalarFieldEnum]
+
+
+export const ChatMessageScalarFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  role: 'role',
+  message: 'message',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatMessageScalarFieldEnum = (typeof ChatMessageScalarFieldEnum)[keyof typeof ChatMessageScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

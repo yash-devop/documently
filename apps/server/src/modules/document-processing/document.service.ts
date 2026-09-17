@@ -17,6 +17,8 @@ export const DocumentService = {
         const documentId = randomUUID();
         const storageKey = `users/${userId}/${documentId}.pdf`;
 
+        console.log("storagekey", storageKey);
+
         try {
           const document = await prisma.document.create({
             data: {
@@ -31,22 +33,23 @@ export const DocumentService = {
 
           documentCreated = true;
 
-          // await uploadToS3({
-          //   key: storageKey,
-          //   body: file.buffer,
-          //   contentType: file.mimetype,
-          // });
+          await uploadToS3({
+            key: storageKey,
+            body: file.buffer,
+            contentType: file.mimetype,
+          });
 
           await DocumentQueue.add("process-document", {
-            documentId: "a35da897-569a-47db-bd47-24d5b30ec216",
+            documentId,
           });
 
           return {
-            id: "a35da897-569a-47db-bd47-24d5b30ec216",
+            id: documentId,
             originalName: file.originalname,
             status: document.status as Prisma.DOCUMENT_STATUS,
           };
         } catch (error) {
+          console.log("error", error);
           if (documentCreated) {
             await prisma.document.update({
               data: {

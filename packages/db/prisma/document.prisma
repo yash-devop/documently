@@ -25,9 +25,23 @@ model Document {
   errorCode    DOCUMENT_ERROR_CODE?
   errorMessage String?
   createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt()
-  user         User                 @relation(fields: [userId], references: [id])
-  chunks       DocumentChunk[]
+  updatedAt    DateTime             @updatedAt
+
+  user   User            @relation(fields: [userId], references: [id])
+  chunks DocumentChunk[]
+  chats  ChatDocument[]
 
   @@map("document")
+}
+
+model ChatDocument {
+  chatId     String
+  documentId String
+
+  chat     Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([chatId, documentId])
+  @@index([documentId])
+  @@map("chat_document")
 }

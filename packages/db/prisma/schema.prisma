@@ -18,6 +18,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   documents     Document[]
+  chats         Chat[]
 
   @@map("user")
 }

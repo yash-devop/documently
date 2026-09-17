@@ -6,7 +6,7 @@ import { DocumentController } from "./document.controller";
 export const DocumentRouter = Router() as Router;
 
 DocumentRouter.post(
-  "/upload-documents",
+  "/documents",
   authMiddleware,
   documentsUpload.array("files"),
   DocumentController.uploadDocuments,

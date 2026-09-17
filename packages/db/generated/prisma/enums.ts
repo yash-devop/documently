@@ -29,3 +29,11 @@ export const DOCUMENT_ERROR_CODE = {
 } as const
 
 export type DOCUMENT_ERROR_CODE = (typeof DOCUMENT_ERROR_CODE)[keyof typeof DOCUMENT_ERROR_CODE]
+
+
+export const MessageRole = {
+  USER: 'USER',
+  ASSISTANT: 'ASSISTANT'
+} as const
+
+export type MessageRole = (typeof MessageRole)[keyof typeof MessageRole]
