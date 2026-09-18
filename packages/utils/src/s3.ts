@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -14,6 +15,8 @@ const S3Config: S3ClientConfig = {
     secretAccessKey: awsEnv.AWS_S3_SECRET_KEY,
   },
 };
+
+const URL_EXPIRES_IN = 60 * 5;
 
 const s3Client = new S3Client(S3Config);
 
@@ -43,7 +46,7 @@ export async function getPresignedUrl(key: string) {
   });
 
   return getSignedUrl(s3Client, command, {
-    expiresIn: 60 * 5,
+    expiresIn: URL_EXPIRES_IN,
   });
 }
 
@@ -66,4 +69,24 @@ export async function downloadFromS3(key: string): Promise<Buffer> {
   } catch (error) {
     throw error;
   }
+}
+
+export async function getFileFromS3(key: string) {
+  const getObject = new GetObjectCommand({
+    Bucket: awsEnv.AWS_S3_BUCKET,
+    Key: key,
+  });
+
+  const data = await s3Client.send(getObject);
+
+  return data.Body;
+}
+
+export async function deleteFileFromS3(key: string) {
+  const deleteObject = new DeleteObjectCommand({
+    Bucket: awsEnv.AWS_S3_BUCKET,
+    Key: key,
+  });
+
+  const data = await s3Client.send(deleteObject);
 }
