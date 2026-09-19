@@ -1,5 +1,5 @@
 import { PDFParse } from "pdf-parse";
-import { RetryableError } from "./error";
+import { RetryableError } from "@repo/embeddings";
 
 export const pdfParser = async (buffer: Buffer) => {
   try {

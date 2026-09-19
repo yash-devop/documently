@@ -1,5 +1,5 @@
-import { RetryableError } from "../../lib/error";
-import { loadTransformer } from "../../lib/embeddings";
+import { RetryableError } from "./lib/error";
+import { loadTransformer } from "./lib/embeddings";
 
 export const getEmbeddings = async (textChunks: string[]) => {
   try {

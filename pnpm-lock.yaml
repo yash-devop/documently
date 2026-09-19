@@ -35,6 +35,9 @@ importers:
       '@repo/db':
         specifier: workspace:^
         version: link:../../packages/db
+      '@repo/embeddings':
+        specifier: workspace:^
+        version: link:../../packages/embeddings
       '@repo/env':
         specifier: workspace:^
         version: link:../../packages/env
@@ -172,21 +175,18 @@ importers:
 
   apps/worker:
     dependencies:
-      '@huggingface/transformers':
-        specifier: ^4.2.0
-        version: 4.2.0
       '@langchain/textsplitters':
         specifier: ^1.0.1
         version: 1.0.1(@langchain/core@1.2.10)
       '@repo/db':
         specifier: workspace:^
         version: link:../../packages/db
+      '@repo/embeddings':
+        specifier: workspace:^
+        version: link:../../packages/embeddings
       '@repo/env':
         specifier: workspace:^
         version: link:../../packages/env
-      '@repo/typescript-config':
-        specifier: workspace:^
-        version: link:../../packages/typescript-config
       '@repo/utils':
         specifier: workspace:^
         version: link:../../packages/utils
@@ -205,6 +205,10 @@ importers:
       tsx:
         specifier: ^4.23.12
         version: 4.23.12
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:^
+        version: link:../../packages/typescript-config
 
   packages/db:
     dependencies:
@@ -224,6 +228,31 @@ importers:
       prisma:
         specifier: 7.10.0
         version: 7.10.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2)
+
+  packages/embeddings:
+    dependencies:
+      '@huggingface/transformers':
+        specifier: ^4.2.0
+        version: 4.2.0
+      '@repo/db':
+        specifier: workspace:^
+        version: link:../db
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 26.3.0
+        version: 26.3.0
+      eslint:
+        specifier: 10.9.1
+        version: 10.9.1(jiti@2.7.0)
+      typescript:
+        specifier: 7.0.2
+        version: 7.0.2
 
   packages/env:
     dependencies:

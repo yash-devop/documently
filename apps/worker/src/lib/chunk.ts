@@ -1,5 +1,5 @@
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { NonRetryableError } from "./error";
+import { NonRetryableError } from "@repo/embeddings";
 
 const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,

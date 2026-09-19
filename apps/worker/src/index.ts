@@ -1,11 +1,10 @@
 import { Prisma, prisma } from "@repo/db";
+import { NonRetryableError, RetryableError, getEmbeddings } from "@repo/embeddings";
 import { downloadFromS3 } from "@repo/utils";
 import { Job, randomUUID, Worker } from "bullmq";
 import { chunkText } from "./lib/chunk";
-import { NonRetryableError, RetryableError } from "./lib/error";
 import { cleanText, pdfParser } from "./lib/pdf-parse";
 import { redisClient } from "./lib/redis";
-import { getEmbeddings } from "./modules/embeddings/embeddings";
 
 const documentWorker = new Worker(
   "document-queue",
