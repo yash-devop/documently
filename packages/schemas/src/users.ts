@@ -7,3 +7,10 @@ export const signupSchema = z.object({
 });
 
 export type SignUpPayload = z.infer<typeof signupSchema>;
+
+export const loginSchema = z.object({
+  email: z.email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginPayload = z.infer<typeof loginSchema>;
