@@ -16,34 +16,18 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@repo/ui";
-import {
-  IconFileText,
-  IconHome,
-  IconMessages,
-  IconSearch,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconMessage, IconPlus, IconSearch } from "@tabler/icons-react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "../lib/better-auth";
 import { DocumentlyLogo } from "./logos/documently-long";
 import { DocumentlySolo } from "./logos/documently-solo";
 import { cn } from "../lib/cn";
 
-const navItems = [
+const dummyChats = [
   {
-    label: "Home",
-    icon: IconHome,
-    href: "/dashboard",
-  },
-  {
-    label: "Documents",
-    icon: IconFileText,
-    href: "/dashboard/documents",
-  },
-  {
-    label: "Chats",
-    icon: IconMessages,
-    href: "/dashboard/chats",
+    id: "chat-1",
+    label: "Untitled chat",
+    href: "/dashboard/chats/chat-1",
   },
 ];
 
@@ -52,6 +36,8 @@ export function AppSidebar() {
   const router = useRouter();
   const { data } = authClient.useSession();
   const { isMobile, state } = useSidebar();
+
+  const isNewChatActive = pathname === "/dashboard";
 
   return (
     <Sidebar
@@ -64,15 +50,19 @@ export function AppSidebar() {
             <div
               className={cn(
                 `flex items-center justify-between w-full hover:bg-transparent py-2.5`,
-                state === "collapsed" && "justify-center",
+                !isMobile && state === "collapsed" && "justify-center",
               )}
-              onClick={() => router.push("/dashboard")}
             >
-              {state === "collapsed" ? (
-                <DocumentlySolo className="w-7" />
-              ) : (
-                <DocumentlyLogo className="w-30" />
-              )}
+              <div
+                onClick={() => router.push("/dashboard")}
+                className="bg-red-50"
+              >
+                {!isMobile && state === "collapsed" ? (
+                  <DocumentlySolo className="w-7" />
+                ) : (
+                  <DocumentlyLogo className="w-30" />
+                )}
+              </div>
               {(isMobile || state === "expanded") && (
                 <SidebarTrigger className="-ml-1" />
               )}
@@ -89,22 +79,37 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`);
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="New chat"
+                  variant="default"
+                  isActive={isNewChatActive}
+                  onClick={() => router.push("/dashboard")}
+                >
+                  <IconPlus className="text-sidebar-foreground" />
+                  <span>New chat</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {dummyChats.map((chat) => {
+                const isActive = pathname === chat.href;
                 return (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={chat.id}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      tooltip={item.label}
-                      onClick={() => router.push(item.href)}
+                      tooltip={chat.label}
+                      onClick={() => router.push(chat.href)}
                     >
-                      <item.icon className="text-sidebar-foreground" />
-                      <span>{item.label}</span>
+                      <IconMessage className="text-sidebar-foreground" />
+                      <span>{chat.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -114,17 +119,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Settings"
-              onClick={() => router.push("/dashboard/settings")}
-            >
-              <IconSettings className="text-sidebar-foreground" />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <Separator className="mx-2 w-auto bg-sidebar-border" />
         <div className="flex min-w-0 items-center gap-2.5 px-2 py-1.5">
           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-lighter text-xs font-medium text-primary-500">

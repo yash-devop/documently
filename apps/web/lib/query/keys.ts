@@ -7,4 +7,9 @@ export const queryKeys = {
     all: ["users"] as const,
     detail: (id: string) => [...queryKeys.users.all, id] as const,
   },
+  chats: {
+    lists: () => ["chats", "list"] as const,
+    details: () => ["chats", "detail"] as const,
+    detail: (id: string) => [...queryKeys.chats.details(), id] as const,
+  },
 } as const;
