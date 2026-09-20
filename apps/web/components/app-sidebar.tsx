@@ -16,26 +16,23 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@repo/ui";
-import { IconMessage, IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconMessageCircle, IconPlus, IconSearch } from "@tabler/icons-react";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "../lib/better-auth";
 import { DocumentlyLogo } from "./logos/documently-long";
 import { DocumentlySolo } from "./logos/documently-solo";
 import { cn } from "../lib/cn";
+import { useChats } from "../hooks/chats/use-chats";
 
-const dummyChats = [
-  {
-    id: "chat-1",
-    label: "Untitled chat",
-    href: "/dashboard/chats/chat-1",
-  },
-];
+const rowColor =
+  "text-foreground-light peer-data-active/menu-button:text-foreground";
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data } = authClient.useSession();
   const { isMobile, state } = useSidebar();
+  const { data: chats, isLoading } = useChats();
 
   const isNewChatActive = pathname === "/dashboard";
 
@@ -55,7 +52,7 @@ export function AppSidebar() {
             >
               <div
                 onClick={() => router.push("/dashboard")}
-                className="bg-red-50"
+                className="flex items-center"
               >
                 {!isMobile && state === "collapsed" ? (
                   <DocumentlySolo className="w-7" />
@@ -88,8 +85,8 @@ export function AppSidebar() {
                   isActive={isNewChatActive}
                   onClick={() => router.push("/dashboard")}
                 >
-                  <IconPlus className="text-sidebar-foreground" />
-                  <span>New chat</span>
+                  <IconPlus className={rowColor} />
+                  <span className={rowColor}>New chat</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -99,21 +96,29 @@ export function AppSidebar() {
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {dummyChats.map((chat) => {
-                const isActive = pathname === chat.href;
-                return (
-                  <SidebarMenuItem key={chat.id}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      tooltip={chat.label}
-                      onClick={() => router.push(chat.href)}
-                    >
-                      <IconMessage className="text-sidebar-foreground" />
-                      <span>{chat.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {isLoading ? null : chats && chats.length === 0 ? (
+                <p className="px-3 py-1.5 text-xs text-muted-foreground">
+                  No chats yet
+                </p>
+              ) : (
+                chats?.map((chat) => {
+                  const isActive = pathname === `/dashboard/chats/${chat.id}`;
+                  return (
+                    <SidebarMenuItem key={chat.id}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        tooltip={chat.title}
+                        onClick={() =>
+                          router.push(`/dashboard/chats/${chat.id}`)
+                        }
+                      >
+                        <IconMessageCircle className={rowColor} />
+                        <span className={cn("truncate", rowColor)}>{chat.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

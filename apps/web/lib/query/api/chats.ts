@@ -15,6 +15,11 @@ export async function createChat(title: string) {
   return data.data;
 }
 
+export async function getChats() {
+  const { data } = await api.get<{ data: Chat[] }>("/chats");
+  return data.data;
+}
+
 export async function getChat(id: string) {
   const { data } = await api.get<{ data: Chat }>(`/chats/${id}`);
   return data.data;
