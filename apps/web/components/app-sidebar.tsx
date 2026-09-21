@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Retry,
   Separator,
   Sidebar,
   SidebarContent,
@@ -23,6 +24,7 @@ import { DocumentlyLogo } from "./logos/documently-long";
 import { DocumentlySolo } from "./logos/documently-solo";
 import { cn } from "../lib/cn";
 import { useChats } from "../hooks/chats/use-chats";
+import { ChatsSkeleton } from "./chat/chats-skeleton";
 
 const rowColor =
   "text-foreground-light peer-data-active/menu-button:text-foreground";
@@ -32,7 +34,13 @@ export function AppSidebar() {
   const router = useRouter();
   const { data } = authClient.useSession();
   const { isMobile, state } = useSidebar();
-  const { data: chats, isLoading } = useChats();
+  const {
+    data: chats,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useChats();
 
   const isNewChatActive = pathname === "/dashboard";
 
@@ -96,9 +104,18 @@ export function AppSidebar() {
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {isLoading ? null : chats && chats.length === 0 ? (
+              {isError ? (
+                <Retry
+                  className="px-3 py-1.5"
+                  message="Something went wrong while loading chats."
+                  retrying={isFetching}
+                  onRetry={() => refetch()}
+                />
+              ) : isLoading ? (
+                <ChatsSkeleton />
+              ) : chats && chats.length === 0 ? (
                 <p className="px-3 py-1.5 text-xs text-muted-foreground">
-                  No chats yet
+                  No chats found
                 </p>
               ) : (
                 chats?.map((chat) => {
