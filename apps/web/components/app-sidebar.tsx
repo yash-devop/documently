@@ -19,11 +19,11 @@ import {
 } from "@repo/ui";
 import { IconMessageCircle, IconPlus, IconSearch } from "@tabler/icons-react";
 import { usePathname, useRouter } from "next/navigation";
-import { authClient } from "../lib/better-auth";
+import { authClient } from "@/lib/better-auth";
 import { DocumentlyLogo } from "./logos/documently-long";
 import { DocumentlySolo } from "./logos/documently-solo";
-import { cn } from "../lib/cn";
-import { useChats } from "../hooks/chats/use-chats";
+import { cn } from "@/lib/cn";
+import { useChats } from "@/hooks/chats/use-chats";
 import { ChatsSkeleton } from "./chat/chats-skeleton";
 
 const rowColor =
@@ -34,13 +34,7 @@ export function AppSidebar() {
   const router = useRouter();
   const { data } = authClient.useSession();
   const { isMobile, state } = useSidebar();
-  const {
-    data: chats,
-    isLoading,
-    isError,
-    isFetching,
-    refetch,
-  } = useChats();
+  const { data: chats, isLoading, isError, isFetching, refetch } = useChats();
 
   const isNewChatActive = pathname === "/dashboard";
 
@@ -130,7 +124,9 @@ export function AppSidebar() {
                         }
                       >
                         <IconMessageCircle className={rowColor} />
-                        <span className={cn("truncate", rowColor)}>{chat.title}</span>
+                        <span className={cn("truncate", rowColor)}>
+                          {chat.title}
+                        </span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -142,7 +138,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <Separator className="mx-2 w-auto bg-sidebar-border" />
-        <div className="flex min-w-0 items-center gap-2.5 px-2 py-1.5">
+        <div className="flex min-w-0 items-center gap-2.5 px-1 py-1.5">
           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-lighter text-xs font-medium text-primary-500">
             {(data?.user?.name ?? data?.user?.email ?? "?")
               .charAt(0)

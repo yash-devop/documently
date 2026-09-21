@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarTrigger, useSidebar } from "@repo/ui";
-import { ChatComposer } from "../../components/chat/chat-composer";
-import { PromptSuggestions } from "../../components/chat/prompt-suggestions";
-import { useCreateChat } from "../../hooks/chats/use-create-chat";
+import { ChatComposer } from "@/components/chat/chat-composer";
+import { PromptSuggestions } from "@/components/chat/prompt-suggestions";
+import { useCreateChat } from "@/hooks/chats/use-create-chat";
 
 const suggestions = [
   "Summarize my latest document",

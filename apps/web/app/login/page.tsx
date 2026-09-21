@@ -23,10 +23,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ContainerWrapper } from "../../components/container-wrapper";
-import { DocumentlySolo } from "../../components/logos/documently-solo";
-import { toast } from "../../components/toasts/index";
-import { authClient } from "../../lib/better-auth";
+import { ContainerWrapper } from "@/components/container-wrapper";
+import { DocumentlySolo } from "@/components/logos/documently-solo";
+import { toast } from "@/components/toasts/index";
+import { authClient } from "@/lib/better-auth";
 
 type LoginValues = z.infer<typeof loginSchema>;
 

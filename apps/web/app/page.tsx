@@ -1,5 +1,5 @@
 "use client";
-import { authClient } from "../lib/better-auth";
+import { authClient } from "@/lib/better-auth";
 
 export default function Home() {
   const { data } = authClient.useSession();

@@ -23,11 +23,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 // import { toast } from "sonner";
 import { z } from "zod";
-import { ContainerWrapper } from "../../components/container-wrapper";
-import { DocumentlySolo } from "../../components/logos/documently-solo";
-import { authClient } from "../../lib/better-auth";
+import { ContainerWrapper } from "@/components/container-wrapper";
+import { DocumentlySolo } from "@/components/logos/documently-solo";
+import { authClient } from "@/lib/better-auth";
 import { useRouter } from "next/navigation";
-import { toast } from "../../components/toasts/index";
+import { toast } from "@/components/toasts/index";
 
 type SignUpValues = z.infer<typeof signupSchema>;
 
