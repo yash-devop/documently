@@ -14,7 +14,12 @@ interface ComposerProps {
   onSubmit: (value: string) => void;
 }
 
-export function Composer({ value, onChange, onAttach, onSubmit }: ComposerProps) {
+export function Composer({
+  value,
+  onChange,
+  onAttach,
+  onSubmit,
+}: ComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const resizeTextarea = (el: HTMLTextAreaElement) => {

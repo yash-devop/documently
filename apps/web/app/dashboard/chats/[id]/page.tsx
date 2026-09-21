@@ -2,19 +2,39 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
+import { Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
 import { ChatComposer } from "@/components/chat/chat-composer";
+import { ChatWelcome } from "@/components/chat/chat-welcome";
+import { Message } from "@/components/chat/message";
+import { MessagesSkeleton } from "@/components/chat/messages-skeleton";
 import { useChat } from "@/hooks/chats/use-chat";
+import { useMessages } from "@/hooks/chats/use-messages";
+import { useSendMessage } from "@/hooks/chats/use-send-message";
 import { cn } from "@/lib/cn";
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
   const { data: chat, isLoading } = useChat(id);
+  const {
+    data: messages,
+    isLoading: isLoadingMessages,
+    isError: isMessagesError,
+    isFetching: isFetchingMessages,
+    refetch: refetchMessages,
+  } = useMessages(id);
   const { isMobile, state } = useSidebar();
   const [value, setValue] = useState("");
+  const { mutate: sendMessage } = useSendMessage(id);
 
   const handleSubmit = () => {
+    const message = value.trim();
+    if (!message) return;
     setValue("");
+    sendMessage(message, {
+      onError: () => {
+        setValue((current) => (current.trim() ? current : message));
+      },
+    });
   };
 
   return (
@@ -40,7 +60,30 @@ export default function ChatPage() {
         </span>
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="no-scrollbar mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-16 pb-28"></div>
+        <div className="no-scrollbar mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-16 pb-28">
+          {isMessagesError ? (
+            <div className="flex items-center justify-center h-full">
+              <Retry
+                message="Something went wrong while loading messages."
+                retrying={isFetchingMessages}
+                onRetry={() => refetchMessages()}
+              />
+            </div>
+          ) : isLoadingMessages ? (
+            <MessagesSkeleton />
+          ) : messages && messages.length === 0 ? (
+            <ChatWelcome />
+          ) : (
+            messages?.map((message) => (
+              <Message
+                key={message.id}
+                role={message.role === "USER" ? "user" : "assistant"}
+              >
+                {message.message}
+              </Message>
+            ))
+          )}
+        </div>
         <div
           className={cn(
             "fixed inset-x-0 bottom-0 z-10 border-t border-border-lighter bg-background",
