@@ -11,17 +11,30 @@ export interface ChatMessage {
   updatedAt: string;
 }
 
+export interface SendMessageResult {
+  chatMessage: ChatMessage;
+  contextString: string;
+  llmresponse: string;
+}
+
+export interface ApiResponse<T> {
+  status: number;
+  data: T;
+  message: string;
+  error: null;
+}
+
 export async function getMessages(chatId: string) {
-  const { data } = await api.get<{ data: ChatMessage[] }>(
+  const { data } = await api.get<ApiResponse<ChatMessage[]>>(
     `/chats/${chatId}/messages`,
   );
   return data.data;
 }
 
 export async function sendMessage(chatId: string, message: string) {
-  const { data } = await api.post<{ data: ChatMessage }>(
+  const { data } = await api.post<ApiResponse<SendMessageResult>>(
     `/chats/${chatId}/messages`,
     { message },
   );
-  return data.data;
+  return data;
 }

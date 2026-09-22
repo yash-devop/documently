@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { toast } from "sonner";
+import { toast } from "@/components/toasts/index";
 
 const API_VERSION = "/api/v1";
 
@@ -17,8 +17,12 @@ export interface ApiError {
 export function getApiError(error: unknown): ApiError {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
+    const data = error.response?.data as
+      | { message?: string; error?: { message?: string } }
+      | undefined;
     const message =
-      error.response?.data?.message ??
+      data?.error?.message ??
+      data?.message ??
       (status === 401 ? "You are not authorized" : "Something went wrong");
     return { message, status };
   }
@@ -34,14 +38,21 @@ api.interceptors.response.use(
     console.log("EROR", error);
 
     if (error.code === "ECONNABORTED") {
-      toast.error("Request timed out");
+      toast({ title: "Request timed out", type: "error" });
     } else if (error.response) {
-      const data = error.response.data as ApiError;
-      toast.error(data.message ?? "Something went wrong");
+      const data = error.response.data as {
+        message?: string;
+        error?: { message?: string };
+      };
+      toast({
+        title:
+          data?.error?.message ?? data?.message ?? "Something went wrong",
+        type: "error",
+      });
     } else if (error.request) {
-      toast.error("Network error. Please try again.");
+      toast({ title: "Network error. Please try again.", type: "error" });
     } else {
-      toast.error(error.message || "Something went wrong");
+      toast({ title: error.message || "Something went wrong", type: "error" });
     }
     return Promise.reject(error);
   },
