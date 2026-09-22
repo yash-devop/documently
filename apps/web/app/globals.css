@@ -5,6 +5,16 @@
 
 @theme {
   --font-geist-sans: var(--font-geist-sans);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from {
+      background-position: 200% center;
+    }
+    to {
+      background-position: -200% center;
+    }
+  }
 }
 
 @layer base {

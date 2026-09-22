@@ -9,11 +9,14 @@ const roleStyles: Record<MessageRole, string> = {
 
 interface MessageProps extends React.ComponentProps<"div"> {
   role?: MessageRole;
+  pending?: boolean;
 }
 
 export function Message({
   role = "assistant",
+  pending = false,
   className,
+  children,
   ...props
 }: MessageProps) {
   return (
@@ -26,6 +29,14 @@ export function Message({
         role === "assistant" && "max-w-full",
       )}
       {...props}
-    />
+    >
+      {role === "user" && pending ? (
+        <span className="bg-clip-text bg-gradient-to-r from-primary-foreground via-primary-foreground/25 to-primary-foreground text-transparent animate-shimmer [background-size:200%_auto]">
+          {children}
+        </span>
+      ) : (
+        children
+      )}
+    </div>
   );
 }
