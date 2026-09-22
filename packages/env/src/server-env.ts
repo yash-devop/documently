@@ -22,6 +22,8 @@ const serverEnvSchema = z.object({
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_API_KEY: z.string(),
 
+  GOOGLE_GEMINI_API_KEY: z.string(),
+
   AWS_REGION: z.string(),
   AWS_S3_ACCESS_KEY: z.string(),
   AWS_S3_SECRET_KEY: z.string(),
@@ -44,6 +46,8 @@ export const serverEnv = serverEnvSchema.parse({
 
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   GITHUB_API_KEY: process.env.GITHUB_API_KEY,
+
+  GOOGLE_GEMINI_API_KEY: process.env.GOOGLE_GEMINI_API_KEY,
 
   AWS_REGION: process.env.AWS_REGION,
   AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY,

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ChatService } from "./chat.service";
 import { ChatPayload } from "@repo/schemas";
+import { AppError } from "../../middlewares/error.middleware";
 export const ChatController = {
   createChat: async (req: Request, res: Response) => {
     try {
@@ -45,6 +46,31 @@ export const ChatController = {
       res.json({
         data,
         message: `${data.title} Fetched successfully`,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+  renameChat: async (req: Request, res: Response) => {
+    try {
+      const {
+        id,
+      }: {
+        id: string;
+      } = req.params as {
+        id: string;
+      };
+      const { title }: ChatPayload = req.body;
+
+      if (!title?.trim()) {
+        throw new AppError("Chat title is required", 400, "VALIDATION_ERROR");
+      }
+
+      const data = await ChatService.renameChat(id, title.trim(), req.user.id);
+
+      res.json({
+        data,
+        message: "Chat renamed successfully",
       });
     } catch (error) {
       throw error;

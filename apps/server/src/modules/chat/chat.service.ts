@@ -49,6 +49,36 @@ export const ChatService = {
       throw new AppError("Error while fetching chat", 400, "FAILED");
     }
   },
+  renameChat: async (chatId: string, title: string, userId: string) => {
+    try {
+      const data = await prisma.chat.findUnique({
+        where: {
+          id: chatId,
+          userId,
+        },
+      });
+
+      if (!data) {
+        throw new AppError(
+          `No Chat Data for ${chatId} found`,
+          404,
+          "NOT_FOUND",
+        );
+      }
+
+      return await prisma.chat.update({
+        where: {
+          id: chatId,
+        },
+        data: {
+          title,
+        },
+      });
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Error while renaming chat", 400, "FAILED");
+    }
+  },
   deleteChat: async (chatId: string, userId: string) => {
     try {
       const data = await prisma.chat.findUnique({

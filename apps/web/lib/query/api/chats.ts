@@ -24,3 +24,13 @@ export async function getChat(id: string) {
   const { data } = await api.get<{ data: Chat }>(`/chats/${id}`);
   return data.data;
 }
+
+export async function renameChat(id: string, title: string) {
+  const { data } = await api.patch<{ data: Chat }>(`/chats/${id}`, { title });
+  return data.data;
+}
+
+export async function deleteChat(id: string) {
+  const { data } = await api.delete<{ message: string }>(`/chats/${id}`);
+  return data;
+}

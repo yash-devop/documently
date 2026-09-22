@@ -7,4 +7,5 @@ export const ChatRouter = Router() as Router;
 ChatRouter.get("/chats", authMiddleware, ChatController.getChats);
 ChatRouter.get("/chats/:id", authMiddleware, ChatController.getChat);
 ChatRouter.post("/chats", authMiddleware, ChatController.createChat);
+ChatRouter.patch("/chats/:id", authMiddleware, ChatController.renameChat);
 ChatRouter.delete("/chats/:id", authMiddleware, ChatController.deleteChat);

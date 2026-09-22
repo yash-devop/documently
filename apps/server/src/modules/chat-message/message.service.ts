@@ -1,6 +1,7 @@
 import { Prisma, prisma } from "@repo/db";
 import { getEmbeddings } from "@repo/embeddings";
 import { AppError } from "../../middlewares/error.middleware";
+import { LLMService } from "../llm/llm.service";
 
 export const ChatMessageService = {
   sendMessage: async (
@@ -67,9 +68,40 @@ export const ChatMessageService = {
         })
         .join("\n\n");
 
+      const recentMessages = await prisma.chatMessage.findMany({
+        where: { chatId },
+        orderBy: { createdAt: "desc" },
+        take: 11,
+      });
+
+      const historyMessages = recentMessages
+        .filter((m) => m.id !== chatMessage.id)
+        .reverse()
+        .slice(-10);
+
+      const historyString = historyMessages
+        .map((m) => `${m.role === "USER" ? "User" : "Assistant"}: ${m.message}`)
+        .join("\n");
+
+      const prompt = LLMService.generateSafePrompt(
+        contextString,
+        historyString,
+        message,
+      );
+
+      const llmresponse = await LLMService.generateAnswer(prompt);
+
+      await prisma.chatMessage.create({
+        data: {
+          role: "ASSISTANT",
+          chatId,
+          message: llmresponse,
+        },
+      });
       return {
         chatMessage,
         contextString,
+        llmresponse,
       };
     } catch (error) {
       if (error instanceof AppError) throw error;

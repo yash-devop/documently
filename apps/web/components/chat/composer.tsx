@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { IconArrowUp, IconPaperclip } from "@tabler/icons-react";
+import { IconCornerDownLeft, IconPaperclip } from "@tabler/icons-react";
 import {
   Tooltip,
   TooltipContent,
@@ -63,27 +63,28 @@ export function Composer({
           onChange(e.target.value);
           resizeTextarea(e.target);
         }}
+        onKeyDown={(e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            if (value.trim()) {
+              onSubmit(value);
+              const el = textareaRef.current;
+              if (el) resizeTextarea(el);
+            }
+          }
+        }}
         placeholder="Ask anything about your documents..."
         rows={1}
         className="min-h-6 max-h-40 flex-1 resize-none border-none bg-transparent px-2 py-1.5 text-sm leading-relaxed outline-none placeholder:text-primary-foreground/60"
       />
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <button
-                type="submit"
-                aria-label="Send message"
-                className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary-lighter text-foreground transition-colors hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={!value.trim()}
-              />
-            }
-          >
-            <IconArrowUp className="size-4" />
-          </TooltipTrigger>
-          <TooltipContent side="top">Send message</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <button
+        type="submit"
+        aria-label="Send message"
+        className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-primary-lighter px-2 text-xs font-medium text-foreground transition-colors hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={!value.trim()}
+      >
+        Ctrl + <IconCornerDownLeft className="size-4" />
+      </button>
     </form>
   );
 }
