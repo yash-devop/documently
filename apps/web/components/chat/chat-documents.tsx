@@ -11,7 +11,16 @@ import {
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@repo/ui";
+import {
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@repo/ui";
 import { cn } from "@/lib/cn";
 import { useAllDocuments } from "@/hooks/chats/use-all-documents";
 import { useAttachDocument } from "@/hooks/chats/use-attach-document";
@@ -41,7 +50,7 @@ function StatusBadge({ status }: { status: DocumentStatus }) {
   return (
     <span
       className={cn(
-        "shrink-0 rounded-full px-1.5 py-px text-[10px] font-medium",
+        "shrink-0 rounded-full px-1.5 py-px text-[10px] font-medium border cursor-default select-none",
         statusStyles[status],
       )}
     >
@@ -105,7 +114,7 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <input
         ref={fileInputRef}
         type="file"
@@ -120,7 +129,7 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
             type="button"
             aria-label="Documents"
             className={cn(
-              "ml-auto flex h-7 max-w-56 cursor-pointer items-center gap-1.5 rounded-md border border-border-lighter/60 bg-foreground-lighter/5 px-2 text-xs text-foreground-lighter transition-colors hover:bg-foreground-lighter/15 hover:text-foreground",
+              "ml-auto flex h-7 max-w-56 cursor-pointer items-center gap-1.5 rounded-md border border-border-lighter bg-foreground-lighter/5 px-2 text-xs text-foreground-light transition-colors hover:bg-foreground-lighter/15 hover:text-foreground",
               documents.length === 0 && "border-dashed",
             )}
           />
@@ -130,7 +139,7 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
         {activeDocument ? (
           <span
             key={activeDocument.id}
-            className="flex min-w-0 items-center gap-1.5 animate-in fade-in-0"
+            className="flex min-w-0 items-center gap-1.5 animate-in fade-in-0 will-change-transform"
           >
             <span className="truncate">{activeDocument.originalName}</span>
             <span className="hidden items-center md:flex">
@@ -154,14 +163,16 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
             Documents ({documents.length})
           </span>
           {documents.length > 0 && (
-            <button
+            <Button
               type="button"
+              variant={"ghost"}
+              size={"xs"}
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex cursor-pointer items-center gap-1 rounded-sm px-1.5 py-0.5 text-xxs text-foreground-lighter transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <IconPaperclip className="size-3" />
               Upload
-            </button>
+            </Button>
           )}
         </div>
 
@@ -195,7 +206,7 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
               return (
                 <li
                   key={doc.id}
-                  className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
+                  className="group flex items-center gap-2 rounded px-2 py-1.5 hover:bg-accent"
                 >
                   <IconFileText className="size-4 shrink-0 text-foreground-lighter" />
                   <div className="min-w-0 flex-1">
@@ -254,26 +265,37 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
                 return (
                   <li
                     key={doc.id}
-                    className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent"
+                    className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-accent"
                   >
                     <IconFileText className="size-4 shrink-0 text-foreground-lighter" />
                     <span className="min-w-0 flex-1 truncate text-xs">
                       {doc.originalName}
                     </span>
                     <StatusBadge status={doc.status} />
-                    <button
-                      type="button"
-                      aria-label={`Attach ${doc.originalName}`}
-                      onClick={() => attachDoc.mutate(doc.id)}
-                      disabled={isAttaching}
-                      className="cursor-pointer rounded-sm p-1 text-foreground-lighter transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isAttaching ? (
-                        <IconLoader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <IconLink className="size-3.5" />
-                      )}
-                    </button>
+                    <TooltipProvider delay={300}>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <button
+                              type="button"
+                              aria-label={`Attach ${doc.originalName}`}
+                              onClick={() => attachDoc.mutate(doc.id)}
+                              disabled={isAttaching}
+                              className="cursor-pointer rounded-sm p-1 text-foreground-lighter transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                          }
+                        >
+                          {isAttaching ? (
+                            <IconLoader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <IconLink className="size-3.5" />
+                          )}
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          Attach to this chat
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </li>
                 );
               })}
