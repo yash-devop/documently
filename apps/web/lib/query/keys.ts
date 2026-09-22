@@ -13,5 +13,10 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.chats.details(), id] as const,
     messages: (chatId: string) =>
       [...queryKeys.chats.detail(chatId), "messages"] as const,
+    documents: (chatId?: string) =>
+      [...queryKeys.chats.detail(chatId ?? ""), "documents"] as const,
+  },
+  documents: {
+    all: () => ["documents", "all"] as const,
   },
 } as const;

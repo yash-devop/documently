@@ -1,36 +1,33 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Composer } from "./composer";
-import { DocumentChips } from "./document-chips";
-import type { SelectedFile } from "./types";
+import { useUploadDocuments } from "@/hooks/chats/use-upload-documents";
 
 interface ChatComposerProps {
+  chatId?: string;
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
 }
 
 export function ChatComposer({
+  chatId,
   value,
   onChange,
   onSubmit,
 }: ChatComposerProps) {
-  const [files, setFiles] = useState<SelectedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadDocs = useUploadDocuments(chatId);
 
   const handleFiles = (list: FileList | null) => {
-    if (!list) return;
-    const picked = Array.from(list).map((file) => ({
-      id: `${file.name}-${file.size}`,
-      name: file.name,
-    }));
-    setFiles((prev) =>
-      [...prev, ...picked].filter(
-        (file, index, all) =>
-          all.findIndex((other) => other.id === file.id) === index,
-      ),
+    if (!chatId || !list || list.length === 0) return;
+    const pdfs = Array.from(list).filter(
+      (file) =>
+        file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
     );
+    if (pdfs.length > 0) uploadDocs.mutate(pdfs);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -39,18 +36,10 @@ export function ChatComposer({
         ref={fileInputRef}
         type="file"
         multiple
-        accept=".pdf,.txt,.md,.doc,.docx"
+        accept=".pdf,application/pdf"
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
-      {files.length > 0 && (
-        <DocumentChips
-          files={files}
-          onRemove={(id) =>
-            setFiles((prev) => prev.filter((file) => file.id !== id))
-          }
-        />
-      )}
       <Composer
         value={value}
         onChange={onChange}

@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
+import { ChatDocuments } from "@/components/chat/chat-documents";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatWelcome } from "@/components/chat/chat-welcome";
+import { DocumentStatusBanner } from "@/components/chat/document-status-banner";
 import { Message } from "@/components/chat/message";
 import { MessagesSkeleton } from "@/components/chat/messages-skeleton";
 import { useChat } from "@/hooks/chats/use-chat";
+import { useDocuments } from "@/hooks/chats/use-documents";
 import { useMessages } from "@/hooks/chats/use-messages";
 import { useSendMessage } from "@/hooks/chats/use-send-message";
 import { cn } from "@/lib/cn";
@@ -24,7 +27,12 @@ export default function ChatPage() {
   } = useMessages(id);
   const { isMobile, state } = useSidebar();
   const [value, setValue] = useState("");
-  const { mutate: sendMessage } = useSendMessage(id);
+  const { data: documents = [] } = useDocuments(id);
+  const {
+    mutate: sendMessage,
+    isPending: isSending,
+    variables: sendVariables,
+  } = useSendMessage(id);
 
   const handleSubmit = () => {
     const message = value.trim();
@@ -58,9 +66,11 @@ export default function ChatPage() {
             (chat?.title ?? "Untitled chat")
           )}
         </span>
+        <ChatDocuments chatId={id} documents={documents} />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="no-scrollbar mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pt-16 pb-28">
+      <div className="flex flex-1 flex-col overflow-hidden pt-12">
+        <DocumentStatusBanner documents={documents} />
+        <div className="no-scrollbar mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pb-28">
           {isMessagesError ? (
             <div className="flex items-center justify-center h-full">
               <Retry
@@ -78,6 +88,12 @@ export default function ChatPage() {
               <Message
                 key={message.id}
                 role={message.role === "USER" ? "user" : "assistant"}
+                pending={
+                  isSending &&
+                  message.id.startsWith("optimistic-") &&
+                  message.message ===
+                    (sendVariables as string | undefined)
+                }
               >
                 {message.message}
               </Message>
@@ -96,6 +112,7 @@ export default function ChatPage() {
           <div className="flex justify-center p-4">
             <div className="w-full max-w-2xl">
               <ChatComposer
+                chatId={id}
                 value={value}
                 onChange={setValue}
                 onSubmit={handleSubmit}
