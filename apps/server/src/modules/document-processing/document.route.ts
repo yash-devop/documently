@@ -17,6 +17,16 @@ DocumentRouter.get(
   authMiddleware,
   DocumentController.getDocuments,
 );
+DocumentRouter.post(
+  "/chats/:chatId/documents/attach",
+  authMiddleware,
+  DocumentController.attachDocument,
+);
+DocumentRouter.get(
+  "/documents",
+  authMiddleware,
+  DocumentController.getAllDocuments,
+);
 DocumentRouter.get(
   "/chats/:chatId/documents/:documentId",
   authMiddleware,

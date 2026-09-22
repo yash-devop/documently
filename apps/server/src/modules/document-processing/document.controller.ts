@@ -1,3 +1,4 @@
+import { attachDocumentSchema } from "@repo/schemas";
 import { Request, Response } from "express";
 import { DocumentService } from "./document.service";
 
@@ -7,8 +8,9 @@ export const DocumentController = {
 
     const user = req.user;
 
-    if (!files || files.length < 0) {
+    if (!files || files.length === 0) {
       return res.status(400).json({
+        status: 400,
         message: "Please provide file/s",
         data: null,
       });
@@ -18,10 +20,16 @@ export const DocumentController = {
       chatId: string;
     };
 
-    const data = await DocumentService.uploadDocuments(files, user, chatId);
+    const { data, message } = await DocumentService.uploadDocuments(
+      files,
+      user,
+      chatId,
+    );
 
-    return res.json({
+    return res.status(201).json({
+      status: 201,
       data,
+      message,
       error: null,
     });
   },
@@ -29,10 +37,46 @@ export const DocumentController = {
     const { chatId } = req.params as {
       chatId: string;
     };
-    const data = await DocumentService.getDocuments(chatId, req.user.id);
+    const { data, message } = await DocumentService.getDocuments(
+      chatId,
+      req.user.id,
+    );
 
-    return res.json({
+    return res.status(200).json({
+      status: 200,
       data,
+      message,
+      error: null,
+    });
+  },
+  getAllDocuments: async (req: Request, res: Response) => {
+    const { data, message } = await DocumentService.getAllDocuments(
+      req.user.id,
+    );
+
+    return res.status(200).json({
+      status: 200,
+      data,
+      message,
+      error: null,
+    });
+  },
+  attachDocument: async (req: Request, res: Response) => {
+    const { chatId } = req.params as {
+      chatId: string;
+    };
+    const body = attachDocumentSchema.parse(req.body);
+
+    const { data, message } = await DocumentService.attachDocument(
+      chatId,
+      body.documentId,
+      req.user.id,
+    );
+
+    return res.status(201).json({
+      status: 201,
+      data,
+      message,
       error: null,
     });
   },
@@ -41,14 +85,16 @@ export const DocumentController = {
       documentId: string;
       chatId: string;
     };
-    const data = await DocumentService.getDocument(
+    const { data, message } = await DocumentService.getDocument(
       chatId,
       documentId,
       req.user.id,
     );
 
-    return res.json({
+    return res.status(200).json({
+      status: 200,
       data,
+      message,
       error: null,
     });
   },
@@ -57,13 +103,15 @@ export const DocumentController = {
       documentId: string;
       chatId: string;
     };
-    const data = await DocumentService.deleteDocument(
+    const { data, message } = await DocumentService.deleteDocument(
       chatId,
       documentId,
       req.user.id,
     );
-    return res.json({
+    return res.status(200).json({
+      status: 200,
       data,
+      message,
       error: null,
     });
   },
@@ -72,16 +120,16 @@ export const DocumentController = {
       documentId: string;
       chatId: string;
     };
-    const url = await DocumentService.downloadDocument(
+    const { data, message } = await DocumentService.downloadDocument(
       chatId,
       documentId,
       req.user.id,
     );
 
-    return res.json({
-      data: {
-        url,
-      },
+    return res.status(200).json({
+      status: 200,
+      data,
+      message,
       error: null,
     });
   },

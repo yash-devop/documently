@@ -99,9 +99,12 @@ export const ChatMessageService = {
         },
       });
       return {
-        chatMessage,
-        contextString,
-        llmresponse,
+        data: {
+          chatMessage,
+          contextString,
+          llmresponse,
+        },
+        message: "Message sent successfully",
       };
     } catch (error) {
       if (error instanceof AppError) throw error;
@@ -122,7 +125,7 @@ export const ChatMessageService = {
         },
       });
 
-      return chatMessage;
+      return { data: chatMessage, message: "Messages fetched successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Error while fetching chat messages", 400, "FAILED");

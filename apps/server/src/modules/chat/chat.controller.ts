@@ -6,14 +6,16 @@ export const ChatController = {
   createChat: async (req: Request, res: Response) => {
     try {
       const { title = "Default Chat" }: ChatPayload = req.body;
-      const data = await ChatService.createChat(title, req.user.id);
+      const { data, message } = await ChatService.createChat(title, req.user.id);
 
-      res.json({
+      res.status(201).json({
+        status: 201,
         data: {
           id: data.id,
           name: data.title,
         },
-        message: "Chat created successfully",
+        message,
+        error: null,
       });
     } catch (error) {
       throw error;
@@ -22,11 +24,13 @@ export const ChatController = {
 
   getChats: async (req: Request, res: Response) => {
     try {
-      const data = await ChatService.getChats(req.user.id);
+      const { data, message } = await ChatService.getChats(req.user.id);
 
-      res.json({
+      res.status(200).json({
+        status: 200,
         data,
-        message: "All Chats fetched successfully",
+        message,
+        error: null,
       });
     } catch (error) {
       throw error;
@@ -41,11 +45,13 @@ export const ChatController = {
       } = req.params as {
         id: string;
       };
-      const data = await ChatService.getChat(id, req.user.id);
+      const { data, message } = await ChatService.getChat(id, req.user.id);
 
-      res.json({
+      res.status(200).json({
+        status: 200,
         data,
-        message: `${data.title} Fetched successfully`,
+        message,
+        error: null,
       });
     } catch (error) {
       throw error;
@@ -66,11 +72,17 @@ export const ChatController = {
         throw new AppError("Chat title is required", 400, "VALIDATION_ERROR");
       }
 
-      const data = await ChatService.renameChat(id, title.trim(), req.user.id);
+      const { data, message } = await ChatService.renameChat(
+        id,
+        title.trim(),
+        req.user.id,
+      );
 
-      res.json({
+      res.status(200).json({
+        status: 200,
         data,
-        message: "Chat renamed successfully",
+        message,
+        error: null,
       });
     } catch (error) {
       throw error;
@@ -85,10 +97,13 @@ export const ChatController = {
       } = req.params as {
         id: string;
       };
-      await ChatService.deleteChat(id, req.user.id);
+      const { data, message } = await ChatService.deleteChat(id, req.user.id);
 
-      res.json({
-        message: "Chat deleted successfully",
+      res.status(200).json({
+        status: 200,
+        data,
+        message,
+        error: null,
       });
     } catch (error) {
       throw error;

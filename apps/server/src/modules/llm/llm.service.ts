@@ -6,11 +6,7 @@ const geminiAI = new GoogleGenAI({
   apiKey: serverEnv.GOOGLE_GEMINI_API_KEY,
 });
 export const LLMService = {
-  generateSafePrompt: (
-    context: string,
-    history: string,
-    message: string,
-  ) => {
+  generateSafePrompt: (context: string, history: string, message: string) => {
     const prompt = `
 You are a document-grounded assistant. Answer the user's question using ONLY the context chunks below, resolving references like "it", "that", "Tell me again", or "the second point" against the conversation history.
 

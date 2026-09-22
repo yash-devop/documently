@@ -7,9 +7,14 @@ export const ChatMessageController = {
     const { chatId } = req.params as {
       chatId: string;
     };
-    const data = await ChatMessageService.getMessages(chatId, req.user.id);
-    return res.json({
+    const { data, message } = await ChatMessageService.getMessages(
+      chatId,
+      req.user.id,
+    );
+    return res.status(200).json({
+      status: 200,
       data,
+      message,
       error: null,
     });
   },
@@ -20,13 +25,15 @@ export const ChatMessageController = {
 
     const body = chatMessageSchema.parse(req.body);
 
-    const data = await ChatMessageService.sendMessage(
+    const { data, message } = await ChatMessageService.sendMessage(
       chatId,
       "USER",
       body.message,
     );
-    return res.json({
+    return res.status(201).json({
+      status: 201,
       data,
+      message,
       error: null,
     });
   },

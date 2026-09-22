@@ -4,12 +4,13 @@ import { AppError } from "../../middlewares/error.middleware";
 export const ChatService = {
   createChat: async (title: string, userId: string) => {
     try {
-      return await prisma.chat.create({
+      const data = await prisma.chat.create({
         data: {
           title,
           userId,
         },
       });
+      return { data, message: "Chat created successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Chat Creation failed", 400, "FAILED");
@@ -17,11 +18,12 @@ export const ChatService = {
   },
   getChats: async (userId: string) => {
     try {
-      return await prisma.chat.findMany({
+      const data = await prisma.chat.findMany({
         where: {
           userId,
         },
       });
+      return { data, message: "Chats fetched successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Error while fetching all chats", 400, "FAILED");
@@ -43,7 +45,7 @@ export const ChatService = {
           "NOT_FOUND",
         );
       }
-      return data;
+      return { data, message: "Chat fetched successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Error while fetching chat", 400, "FAILED");
@@ -66,14 +68,17 @@ export const ChatService = {
         );
       }
 
-      return await prisma.chat.update({
-        where: {
-          id: chatId,
-        },
-        data: {
-          title,
-        },
-      });
+      return {
+        data: await prisma.chat.update({
+          where: {
+            id: chatId,
+          },
+          data: {
+            title,
+          },
+        }),
+        message: "Chat renamed successfully",
+      };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Error while renaming chat", 400, "FAILED");
@@ -102,7 +107,7 @@ export const ChatService = {
         },
       });
 
-      return data;
+      return { data, message: "Chat deleted successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Error while deleting chat", 400, "FAILED");

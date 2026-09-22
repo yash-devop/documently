@@ -40,7 +40,7 @@ export const errorMiddleware = (
 ) => {
   console.log("Global Error Catch => ", err);
   if (err instanceof ZodError) {
-    return res.json({
+    return res.status(400).json({
       status: 400,
       error: {
         code: "VALIDATION_ERROR",
@@ -51,7 +51,7 @@ export const errorMiddleware = (
   }
 
   if (err instanceof Prisma.Prisma.PrismaClientKnownRequestError) {
-    return res.json({
+    return res.status(409).json({
       status: 409,
       error: {
         code: err.code,
@@ -63,7 +63,7 @@ export const errorMiddleware = (
   }
 
   if (err instanceof Prisma.Prisma.PrismaClientValidationError) {
-    return res.json({
+    return res.status(400).json({
       status: 400,
       error: {
         code: "PRISMA_VALIDATION_ERROR",
@@ -74,7 +74,7 @@ export const errorMiddleware = (
   }
 
   if (err instanceof AppError) {
-    return res.json({
+    return res.status(err.status).json({
       status: err.status,
       error: {
         code: err.code,
@@ -84,7 +84,7 @@ export const errorMiddleware = (
     });
   }
 
-  return res.json({
+  return res.status(500).json({
     status: 500,
     error: {
       code: "INTERNAL_SERVER_ERROR",

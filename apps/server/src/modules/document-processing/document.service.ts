@@ -11,13 +11,10 @@ export const DocumentService = {
     user: User,
     chatId: string,
   ) => {
-    if (files.length === 0) return;
-
     const userId = user.id;
 
     const res = await Promise.all(
       files.map(async (file) => {
-        let documentCreated = false;
         const documentId = randomUUID();
         const storageKey = `users/${userId}/${documentId}.pdf`;
 
@@ -40,8 +37,6 @@ export const DocumentService = {
             },
           });
 
-          documentCreated = true;
-
           await uploadToS3({
             key: storageKey,
             body: file.buffer,
@@ -59,23 +54,21 @@ export const DocumentService = {
           };
         } catch (error) {
           console.log("error", error);
-          if (documentCreated) {
-            await prisma.document.update({
-              data: {
-                status: "FAILED",
-              },
-              where: {
-                id: documentId,
-              },
-            });
-          }
+          await prisma.document.update({
+            data: {
+              status: "FAILED",
+            },
+            where: {
+              id: documentId,
+            },
+          });
 
           throw new AppError("Document upload failed", 400, "FAILED");
         }
       }),
     );
 
-    return res;
+    return { data: res, message: "Documents uploaded successfully" };
   },
   getDocuments: async (chatId: string, userId: string) => {
     try {
@@ -90,14 +83,76 @@ export const DocumentService = {
         },
       });
 
-      if (documents.length === 0) {
-        throw new AppError("No documents found.", 404, "NOT_FOUND");
-      }
-
-      return documents;
+      return { data: documents, message: "Documents fetched successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Documents Fetch failed", 400, "FAILED");
+    }
+  },
+  getAllDocuments: async (userId: string) => {
+    try {
+      const documents = await prisma.document.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return { data: documents, message: "Documents fetched successfully" };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Fetching documents failed", 400, "FAILED");
+    }
+  },
+  attachDocument: async (
+    chatId: string,
+    documentId: string,
+    userId: string,
+  ) => {
+    try {
+      const [chat, document] = await Promise.all([
+        prisma.chat.findFirst({
+          where: {
+            id: chatId,
+            userId,
+          },
+        }),
+        prisma.document.findFirst({
+          where: {
+            id: documentId,
+            userId,
+          },
+        }),
+      ]);
+
+      if (!chat) {
+        throw new AppError("Chat not found.", 404, "NOT_FOUND");
+      }
+
+      if (!document) {
+        throw new AppError("Document not found.", 404, "NOT_FOUND");
+      }
+
+      await prisma.chatDocument.upsert({
+        where: {
+          chatId_documentId: {
+            chatId,
+            documentId,
+          },
+        },
+        update: {},
+        create: {
+          chatId,
+          documentId,
+        },
+      });
+
+      return { data: document, message: "Document attached successfully" };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Attaching document failed", 400, "FAILED");
     }
   },
   getDocument: async (chatId: string, documentId: string, userId: string) => {
@@ -118,7 +173,7 @@ export const DocumentService = {
         throw new AppError("No document found.", 404, "NOT_FOUND");
       }
 
-      return document;
+      return { data: document, message: "Document fetched successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Fetching Single Document failed", 400, "FAILED");
@@ -154,7 +209,7 @@ export const DocumentService = {
         },
       });
 
-      return { id: documentId };
+      return { data: { id: documentId }, message: "Document deleted successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Deleting Document failed", 400, "FAILED");
@@ -183,7 +238,7 @@ export const DocumentService = {
       }
 
       const pdfUrl = getPresignedUrl(document.storageKey);
-      return pdfUrl;
+      return { data: { url: pdfUrl }, message: "Download link generated" };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Couldn't find Document url", 404, "FAILED");
