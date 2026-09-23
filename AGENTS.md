@@ -24,7 +24,7 @@ pnpm workspaces + Turborepo. `apps/*` and `packages/*`.
 - `packages/ui` — shadcn/ui components (base-ui based) + shared hooks. **Source of truth for all UI components.** Exports from `src/index.tsx`; components live in `src/components/ui/`, hooks in `src/hooks/`.
 - `packages/db` — Prisma 7 client. Multi-file schema in `packages/db/prisma/*.prisma` (split: chat, chunk, document, message, schema). Client generated to `packages/db/generated/prisma`. Exports `prisma` and `Prisma` from `packages/db/client.ts`.
 - `packages/env` — zod-validated env for each target: `serverEnv`, `workerEnv`, `awsEnv`. Loads `.env.local` (dev) or `.env.production` (prod).
-- `packages/embeddings` — `getEmbeddings()` (transformer-based, 384-dim vectors), plus `RetryableError`/`NonRetryableError`.
+- `packages/embeddings` — `getEmbeddings()` (transformer-based, 384-dim vectors, loaded quantized `dtype: "q8"`), plus `RetryableError`/`NonRetryableError`.
 - `packages/schemas` — shared zod schemas + inferred types (`attachDocumentSchema`, `ChatPayload`, etc.).
 - `packages/utils` — S3 helpers (`uploadToS3`, `downloadFromS3`, `deleteFileFromS3`, `getPresignedUrl`).
 - `packages/eslint-config`, `packages/typescript-config` — shared configs.
@@ -108,3 +108,8 @@ Requires: Node >= 24, pnpm 11. Env files: `apps/server/.env.local` (also feeds `
 - When the user says "commit all changes", split the work into **separate logical commits** (grouped by feature/area) instead of one big commit.
 - Use conventional-commit style messages (e.g. `feat(server): ...`, `feat(web): ...`, `chore(packages): ...`) matching the existing repo history.
 - Only commit when the user explicitly asks.
+
+## Docs
+
+- Long-form reference and decision records live in `docs/`, not here. Keep this file as the short always-on index.
+- Deployment plan, hosting verdict, and accepted trade-offs → `docs/DEPLOYMENT.md`.
