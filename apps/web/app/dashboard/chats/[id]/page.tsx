@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
 import { ChatDocuments } from "@/components/chat/chat-documents";
@@ -29,28 +29,39 @@ export default function ChatPage() {
   const [value, setValue] = useState("");
   const { data: documents = [] } = useDocuments(id);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const stickToBottomRef = useRef(true);
-
-  const handleScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    stickToBottomRef.current =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-  };
+  const bottomObserverRef = useRef<IntersectionObserver | null>(null);
+  const atBottomRef = useRef(true);
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    handleScroll();
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
+    atBottomRef.current = true;
+  }, [id]);
+
+  const setBottomSentinel = useCallback((node: HTMLDivElement | null) => {
+    const prev = bottomObserverRef.current;
+    prev?.disconnect();
+    bottomObserverRef.current = null;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        atBottomRef.current = entry?.isIntersecting ?? true;
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(node);
+    bottomObserverRef.current = observer;
   }, []);
 
   useEffect(() => {
-    if (messages && messages.length > 0 && stickToBottomRef.current) {
+    return () => bottomObserverRef.current?.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (messages && messages.length > 0 && atBottomRef.current) {
       requestAnimationFrame(() => {
         const el = scrollRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
+        if (el && el.scrollHeight - el.clientHeight > 0) {
+          el.scrollTo({ top: el.scrollHeight });
+        }
       });
     }
   }, [messages]);
@@ -71,7 +82,9 @@ export default function ChatPage() {
     });
     requestAnimationFrame(() => {
       const el = scrollRef.current;
-      if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      if (el && el.scrollHeight - el.clientHeight > 0) {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      }
     });
   };
 
@@ -124,14 +137,14 @@ export default function ChatPage() {
                 pending={
                   isSending &&
                   message.id.startsWith("optimistic-") &&
-                  message.message ===
-                    (sendVariables as string | undefined)
+                  message.message === (sendVariables as string | undefined)
                 }
               >
                 {message.message}
               </Message>
             ))
           )}
+          <div ref={setBottomSentinel} className="h-px shrink-0" aria-hidden />
         </div>
         <div
           className={cn(
