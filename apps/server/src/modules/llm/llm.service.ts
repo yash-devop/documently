@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { serverEnv } from "@repo/env/serverEnv";
 import { AppError } from "../../middlewares/error.middleware";
 
@@ -34,6 +34,11 @@ ${message}
       const res = await geminiAI.models.generateContent({
         model: "gemini-3.5-flash-lite",
         contents: prompt,
+        config: {
+          thinkingConfig: {
+            thinkingLevel: ThinkingLevel.MINIMAL,
+          },
+        },
       });
       if (!res.text) {
         throw new AppError("Gemini returned no answer.", 502, "FAILED");
@@ -44,6 +49,27 @@ ${message}
       if (error instanceof AppError) throw error;
       console.log("Gemini error", error);
       throw new AppError("Failed to generate LLM answer", 502, "FAILED", {
+        cause: error,
+      });
+    }
+  },
+  generateAnswerStream: async function* (
+    prompt: string,
+  ): AsyncGenerator<string> {
+    try {
+      const stream = await geminiAI.models.generateContentStream({
+        model: "gemini-3.5-flash-lite",
+        contents: prompt,
+      });
+
+      for await (const chunk of stream) {
+        const text = chunk.text ?? "";
+        if (text) yield text;
+      }
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      console.log("Gemini stream error", error);
+      throw new AppError("Failed to stream LLM answer", 502, "FAILED", {
         cause: error,
       });
     }

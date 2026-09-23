@@ -3,6 +3,93 @@ import { getEmbeddings } from "@repo/embeddings";
 import { AppError } from "../../middlewares/error.middleware";
 import { LLMService } from "../llm/llm.service";
 
+const prepareAnswer = async (
+  chatId: string,
+  role: Prisma.MessageRole,
+  message: string,
+) => {
+  const chat = await prisma.chat.findUnique({
+    where: {
+      id: chatId,
+    },
+  });
+
+  if (!chat) {
+    throw new AppError(
+      `Chat with id ${chatId} doesnt exists.`,
+      400,
+      "FAILED",
+    );
+  }
+
+  const chatMessage = await prisma.chatMessage.create({
+    data: {
+      message,
+      role,
+      chatId,
+    },
+  });
+
+  // get embeddings for question:
+  const questionEmbedding = await getEmbeddings([message]);
+  const queryVector = `[${questionEmbedding[0].join(",")}]`;
+
+  const similarChunks = await prisma.$queryRaw<
+    {
+      id: string;
+      documentId: string;
+      content: string;
+      chunkIndex: number;
+      distance: number;
+    }[]
+  >`
+    SELECT
+      dc."id",
+      dc."documentId",
+      dc."content",
+      dc."chunkIndex",
+      dc."embedding" <=> ${queryVector}::vector AS "distance"
+    FROM "document_chunk" dc
+    INNER JOIN "chat_document" cd ON cd."documentId" = dc."documentId"
+    INNER JOIN "document" d ON d."id" = dc."documentId"
+    WHERE cd."chatId" = ${chatId}
+      AND d."status" = 'READY'
+      AND dc."embedding" IS NOT NULL
+    ORDER BY dc."embedding" <=> ${queryVector}::vector ASC
+    LIMIT 5;
+  `;
+
+  const contextString = similarChunks
+    .map((chunk, idx) => {
+      return `[context ${idx + 1}]: 
+      ${chunk.content}`;
+    })
+    .join("\n\n");
+
+  const recentMessages = await prisma.chatMessage.findMany({
+    where: { chatId },
+    orderBy: { createdAt: "desc" },
+    take: 11,
+  });
+
+  const historyMessages = recentMessages
+    .filter((m) => m.id !== chatMessage.id)
+    .reverse()
+    .slice(-10);
+
+  const historyString = historyMessages
+    .map((m) => `${m.role === "USER" ? "User" : "Assistant"}: ${m.message}`)
+    .join("\n");
+
+  const prompt = LLMService.generateSafePrompt(
+    contextString,
+    historyString,
+    message,
+  );
+
+  return { chatMessage, contextString, prompt };
+};
+
 export const ChatMessageService = {
   sendMessage: async (
     chatId: string,
@@ -10,82 +97,9 @@ export const ChatMessageService = {
     message: string,
   ) => {
     try {
-      const chat = await prisma.chat.findUnique({
-        where: {
-          id: chatId,
-        },
-      });
-
-      if (!chat) {
-        throw new AppError(
-          `Chat with id ${chatId} doesnt exists.`,
-          400,
-          "FAILED",
-        );
-      }
-
-      const chatMessage = await prisma.chatMessage.create({
-        data: {
-          message,
-          role,
-          chatId,
-        },
-      });
-
-      // get embeddings for question:
-      const questionEmbedding = await getEmbeddings([message]);
-      const queryVector = `[${questionEmbedding[0].join(",")}]`;
-
-      const similarChunks = await prisma.$queryRaw<
-        {
-          id: string;
-          documentId: string;
-          content: string;
-          chunkIndex: number;
-          distance: number;
-        }[]
-      >`
-        SELECT
-          dc."id",
-          dc."documentId",
-          dc."content",
-          dc."chunkIndex",
-          dc."embedding" <=> ${queryVector}::vector AS "distance"
-        FROM "document_chunk" dc
-        INNER JOIN "chat_document" cd ON cd."documentId" = dc."documentId"
-        INNER JOIN "document" d ON d."id" = dc."documentId"
-        WHERE cd."chatId" = ${chatId}
-          AND d."status" = 'READY'
-          AND dc."embedding" IS NOT NULL
-        ORDER BY dc."embedding" <=> ${queryVector}::vector ASC
-        LIMIT 5;
-      `;
-
-      const contextString = similarChunks
-        .map((chunk, idx) => {
-          return `[context ${idx + 1}]: 
-          ${chunk.content}`;
-        })
-        .join("\n\n");
-
-      const recentMessages = await prisma.chatMessage.findMany({
-        where: { chatId },
-        orderBy: { createdAt: "desc" },
-        take: 11,
-      });
-
-      const historyMessages = recentMessages
-        .filter((m) => m.id !== chatMessage.id)
-        .reverse()
-        .slice(-10);
-
-      const historyString = historyMessages
-        .map((m) => `${m.role === "USER" ? "User" : "Assistant"}: ${m.message}`)
-        .join("\n");
-
-      const prompt = LLMService.generateSafePrompt(
-        contextString,
-        historyString,
+      const { chatMessage, contextString, prompt } = await prepareAnswer(
+        chatId,
+        role,
         message,
       );
 
@@ -103,6 +117,46 @@ export const ChatMessageService = {
           chatMessage,
           contextString,
           llmresponse,
+        },
+        message: "Message sent successfully",
+      };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Chat message creation failed", 400, "FAILED");
+    }
+  },
+  streamAnswer: async (
+    chatId: string,
+    role: Prisma.MessageRole,
+    message: string,
+    onToken: (delta: string) => void,
+  ) => {
+    try {
+      const { chatMessage, prompt } = await prepareAnswer(chatId, role, message);
+
+      let fullText = "";
+      for await (const delta of LLMService.generateAnswerStream(prompt)) {
+        fullText += delta;
+        onToken(delta);
+      }
+
+      if (!fullText.trim()) {
+        throw new AppError("Gemini returned no answer.", 502, "FAILED");
+      }
+
+      const assistantMessage = await prisma.chatMessage.create({
+        data: {
+          role: "ASSISTANT",
+          chatId,
+          message: fullText,
+        },
+      });
+
+      return {
+        data: {
+          chatMessage,
+          assistantMessage,
+          llmresponse: fullText,
         },
         message: "Message sent successfully",
       };

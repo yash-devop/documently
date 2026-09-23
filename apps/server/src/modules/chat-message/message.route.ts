@@ -10,6 +10,11 @@ ChatMessageRouter.get(
   ChatMessageController.getMessages,
 );
 ChatMessageRouter.post(
+  "/chats/:chatId/messages/stream",
+  authMiddleware,
+  ChatMessageController.streamMessage,
+);
+ChatMessageRouter.post(
   "/chats/:chatId/messages",
   authMiddleware,
   ChatMessageController.sendMessage,
