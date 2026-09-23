@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
 import { ChatDocuments } from "@/components/chat/chat-documents";
@@ -28,6 +28,32 @@ export default function ChatPage() {
   const { isMobile, state } = useSidebar();
   const [value, setValue] = useState("");
   const { data: documents = [] } = useDocuments(id);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    handleScroll();
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (messages && messages.length > 0 && stickToBottomRef.current) {
+      requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+    }
+  }, [messages]);
   const {
     mutate: sendMessage,
     isPending: isSending,
@@ -43,10 +69,14 @@ export default function ChatPage() {
         setValue((current) => (current.trim() ? current : message));
       },
     });
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
   };
 
   return (
-    <div className="flex h-full flex-1 flex-col">
+    <div className="flex h-dvh flex-1 flex-col">
       <div
         className={cn(
           "fixed inset-x-0 top-0 z-10 flex h-12 items-center gap-2 border-b border-border-lighter bg-background px-4",
@@ -70,7 +100,10 @@ export default function ChatPage() {
       </div>
       <div className="flex flex-1 flex-col overflow-hidden pt-12">
         <DocumentStatusBanner documents={documents} />
-        <div className="no-scrollbar mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pb-28">
+        <div
+          ref={scrollRef}
+          className="no-scrollbar mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pb-28"
+        >
           {isMessagesError ? (
             <div className="flex items-center justify-center h-full">
               <Retry
