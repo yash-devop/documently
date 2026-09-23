@@ -8,6 +8,7 @@ export const loadTransformer = () => {
     transformer = pipeline(
       "feature-extraction",
       "BAAI/bge-small-en-v1.5",
+      { dtype: "q8" },
     ).catch((error: unknown) => {
       transformer = null;
       throw new RetryableError(
