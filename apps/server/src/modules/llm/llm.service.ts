@@ -36,7 +36,7 @@ ${message}
         contents: prompt,
         config: {
           thinkingConfig: {
-            thinkingLevel: ThinkingLevel.MINIMAL,
+            thinkingLevel: ThinkingLevel.MEDIUM,
           },
         },
       });
