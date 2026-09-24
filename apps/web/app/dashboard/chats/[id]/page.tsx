@@ -102,7 +102,7 @@ function ChatContentView({ chatId }: { chatId: string }) {
   };
 
   return (
-    <div className="flex h-dvh flex-1 flex-col">
+    <div className="flex h-dvh flex-1 flex-col pt-10">
       <div
         className={cn(
           "fixed inset-x-0 top-0 z-10 flex h-12 items-center gap-2 border-b border-border-lighter bg-background px-4",

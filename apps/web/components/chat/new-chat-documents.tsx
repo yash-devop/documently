@@ -161,6 +161,7 @@ export function NewChatDocuments({
               type="button"
               size="sm"
               variant="outline"
+              className={"gap-1"}
               onClick={() => fileInputRef.current?.click()}
             >
               <IconUpload className="size-3.5" />
@@ -181,16 +182,16 @@ export function NewChatDocuments({
                     New upload
                   </p>
                 </div>
-                <button
+                <Button
                   type="button"
                   aria-label={`Remove ${file.name}`}
                   onClick={() =>
                     onFilesChange(files.filter((_, item) => item !== index))
                   }
-                  className="cursor-pointer rounded-sm p-1 text-foreground-lighter transition-colors hover:text-red-600"
+                  className="cursor-pointer rounded-sm p-1 text-foreground-lighter transition-colors hover:text-red-600 gap-2"
                 >
                   <IconTrash className="size-3.5" />
-                </button>
+                </Button>
               </li>
             ))}
             {stagedLibraryDocs.map((doc) => (
