@@ -62,11 +62,14 @@ Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `d
 
 ## Architecture & data flow
 
+- **New chat (welcome screen)**: `/dashboard` has no chat yet. Documents are staged client-side in local state (`components/chat/new-chat-documents.tsx`; the page owns `files` + `libraryIds`). On the first message the page: `POST /chats` to create the chat → uploads staged files + attaches staged library docs → invalidates document keys → sends the message → redirects to `/dashboard/chats/:id`. The composer paperclip stages files too while `chatId` is missing.
+
 1. `web` uploads PDFs → `POST /api/v1/chats/:chatId/documents` (multer `.array("files")`).
 2. `document.service.ts` creates the `Document` (status `PROCESSING`), uploads to S3, enqueues `process-document` on BullMQ.
 3. `worker` processes the job; on success marks `READY`, on failure `FAILED` with `errorCode`/`errorMessage`. Non-retryable errors skip retries; others are retried by BullMQ.
 4. `web` polls/Documents list (status badges, auto-refetch while any doc is `PROCESSING`).
 5. Sending a message: server generates an embedding for the question, finds the 5 closest chunks via `<=>` (cosine) over chunks belonging to the chat's attached docs (`chat_document` join) with `status = 'READY'`, builds a grounded prompt with conversation history, and streams the Gemini answer (SSE) back to the client.
+6. Attaching (`POST /api/v1/chats/:chatId/documents/attach`) and detaching (`DELETE /api/v1/chats/:chatId/documents/:documentId/detach`) only create/remove the `chat_document` join row (detach keeps the file in the library). `DELETE /api/v1/chats/:chatId/documents/:documentId` is the hard delete (S3 file + DB row).
 
 ## Server conventions
 
@@ -80,6 +83,7 @@ Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `d
 
 - **React Query everywhere**: backend calls go in `lib/query/api/*` (typed, unwrap `{ data }` from the envelope), react-query mutations/queries wrapped in `hooks/chats/*`, keys centralized in `lib/query/keys.ts`. Invalidate the relevant keys (`queryKeys.chats.documents(chatId)`, `queryKeys.documents.all()`) after changes.
 - **Optimistic + streaming**: `use-send-message.ts` shows an optimistic user bubble + empty streaming placeholder, appends tokens via `setQueryData`, and swaps in the real assistant message on completion.
+- **Markdown answers**: assistant messages render through `react-markdown` + `remark-gfm` via `components/chat/markdown-content.tsx` (styled headings/lists/code/tables). Don't render assistant text as raw pre-wrap; user messages stay plain text.
 - **Toasts**: use the custom `toast({ title, type })` from `@/components/toasts/index` (or via the axios error interceptor + `getApiError`). Do not use window.alert.
 - **Icons**: `@tabler/icons-react`.
 - **Path alias**: `@/` → `apps/web` root.
@@ -101,6 +105,7 @@ Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `d
 
 - Do not add comments unless asked.
 - Follow existing patterns (service/controller shape, envelope, query-keys + hooks flow) over inventing new ones.
+- Reset per-route state with `key` remounts (e.g. the chat view remounts per `chatId`) instead of `setState` inside `useEffect` — lint enforces `react-hooks/set-state-in-effect`.
 - Keep changes type-clean: run the targeted `check-types`/`lint` before finishing.
 
 ## Commit conventions
