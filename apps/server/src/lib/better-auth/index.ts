@@ -30,7 +30,9 @@ export const auth = betterAuth({
   },
   advanced: {
     defaultCookieAttributes: {
-      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
+      sameSite: serverEnv.BETTER_AUTH_URL.startsWith("https://")
+        ? "none"
+        : "lax",
     },
   },
 });
