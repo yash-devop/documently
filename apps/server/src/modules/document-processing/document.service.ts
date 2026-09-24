@@ -179,6 +179,53 @@ export const DocumentService = {
       throw new AppError("Fetching Single Document failed", 400, "FAILED");
     }
   },
+  detachDocument: async (
+    chatId: string,
+    documentId: string,
+    userId: string,
+  ) => {
+    try {
+      const [chat, document] = await Promise.all([
+        prisma.chat.findFirst({
+          where: {
+            id: chatId,
+            userId,
+          },
+        }),
+        prisma.document.findFirst({
+          where: {
+            id: documentId,
+            userId,
+          },
+        }),
+      ]);
+
+      if (!chat) {
+        throw new AppError("Chat not found.", 404, "NOT_FOUND");
+      }
+
+      if (!document) {
+        throw new AppError("Document not found.", 404, "NOT_FOUND");
+      }
+
+      await prisma.chatDocument.delete({
+        where: {
+          chatId_documentId: {
+            chatId,
+            documentId,
+          },
+        },
+      });
+
+      return {
+        data: { id: documentId },
+        message: "Document detached successfully",
+      };
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Detaching document failed", 400, "FAILED");
+    }
+  },
   deleteDocument: async (
     chatId: string,
     documentId: string,

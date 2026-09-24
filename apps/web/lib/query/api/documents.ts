@@ -76,6 +76,13 @@ export async function deleteDocument(chatId: string, documentId: string) {
   return data;
 }
 
+export async function detachDocument(chatId: string, documentId: string) {
+  const { data } = await api.delete<DocumentApiResponse<{ id: string }>>(
+    `/chats/${chatId}/documents/${documentId}/detach`,
+  );
+  return data;
+}
+
 export async function downloadDocument(chatId: string, documentId: string) {
   const { data } = await api.post<DocumentApiResponse<{ url: string }>>(
     `/chats/${chatId}/documents/${documentId}/download`,

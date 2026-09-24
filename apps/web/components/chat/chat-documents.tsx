@@ -6,6 +6,7 @@ import {
   IconDownload,
   IconFileText,
   IconLink,
+  IconLinkOff,
   IconLoader2,
   IconPaperclip,
   IconTrash,
@@ -25,6 +26,7 @@ import { cn } from "@/lib/cn";
 import { useAllDocuments } from "@/hooks/chats/use-all-documents";
 import { useAttachDocument } from "@/hooks/chats/use-attach-document";
 import { useDeleteDocument } from "@/hooks/chats/use-delete-document";
+import { useDetachDocument } from "@/hooks/chats/use-detach-document";
 import { useUploadDocuments } from "@/hooks/chats/use-upload-documents";
 import {
   downloadDocument,
@@ -73,6 +75,7 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
 
   const uploadDocs = useUploadDocuments(chatId);
   const deleteDoc = useDeleteDocument(chatId);
+  const detachDoc = useDetachDocument(chatId);
   const attachDoc = useAttachDocument(chatId);
   const { data: library = [] } = useAllDocuments();
 
@@ -220,6 +223,26 @@ export function ChatDocuments({ chatId, documents }: ChatDocumentsProps) {
                       )}
                     </p>
                   </div>
+                  <TooltipProvider delay={300}>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <button
+                            type="button"
+                            aria-label={`Detach ${doc.originalName}`}
+                            onClick={() => detachDoc.mutate(doc.id)}
+                            disabled={detachDoc.isPending && detachDoc.variables === doc.id}
+                            className="cursor-pointer rounded-sm p-1 text-foreground-lighter transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        }
+                      >
+                        <IconLinkOff className="size-3.5" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        Detach from this chat
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <button
                     type="button"
                     aria-label={`Download ${doc.originalName}`}

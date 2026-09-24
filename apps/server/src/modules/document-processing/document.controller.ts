@@ -98,6 +98,23 @@ export const DocumentController = {
       error: null,
     });
   },
+  detachDocument: async (req: Request, res: Response) => {
+    const { documentId, chatId } = req.params as {
+      documentId: string;
+      chatId: string;
+    };
+    const { data, message } = await DocumentService.detachDocument(
+      chatId,
+      documentId,
+      req.user.id,
+    );
+    return res.status(200).json({
+      status: 200,
+      data,
+      message,
+      error: null,
+    });
+  },
   deleteDocument: async (req: Request, res: Response) => {
     const { documentId, chatId } = req.params as {
       documentId: string;

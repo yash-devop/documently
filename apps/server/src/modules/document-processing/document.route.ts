@@ -37,6 +37,11 @@ DocumentRouter.delete(
   authMiddleware,
   DocumentController.deleteDocument,
 );
+DocumentRouter.delete(
+  "/chats/:chatId/documents/:documentId/detach",
+  authMiddleware,
+  DocumentController.detachDocument,
+);
 DocumentRouter.post(
   "/chats/:chatId/documents/:documentId/download",
   authMiddleware,
