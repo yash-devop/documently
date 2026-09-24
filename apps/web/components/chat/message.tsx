@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { MarkdownContent } from "./markdown-content";
 
 export type MessageRole = "user" | "assistant";
 
@@ -23,19 +24,24 @@ export function Message({
     <div
       data-role={role}
       className={cn(
-        "max-w-[75%] rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+        "rounded-2xl text-sm leading-relaxed",
         roleStyles[role],
         className,
+        role === "user" && "max-w-[75%] whitespace-pre-wrap",
         role === "assistant" && "max-w-full",
       )}
       {...props}
     >
-      {role === "user" && pending ? (
-        <span className="bg-clip-text bg-gradient-to-r from-primary-foreground via-primary-foreground/25 to-primary-foreground text-transparent animate-shimmer [background-size:200%_auto]">
-          {children}
-        </span>
+      {role === "user" ? (
+        pending ? (
+          <span className="bg-clip-text bg-gradient-to-r from-primary-foreground via-primary-foreground/25 to-primary-foreground text-transparent animate-shimmer [background-size:200%_auto]">
+            {children}
+          </span>
+        ) : (
+          children
+        )
       ) : (
-        children
+        <MarkdownContent content={String(children ?? "")} />
       )}
     </div>
   );
