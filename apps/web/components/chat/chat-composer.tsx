@@ -9,6 +9,7 @@ interface ChatComposerProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
+  onStageFiles?: (files: File[]) => void;
 }
 
 export function ChatComposer({
@@ -16,17 +17,21 @@ export function ChatComposer({
   value,
   onChange,
   onSubmit,
+  onStageFiles,
 }: ChatComposerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadDocs = useUploadDocuments(chatId);
 
   const handleFiles = (list: FileList | null) => {
-    if (!chatId || !list || list.length === 0) return;
+    if (!list || list.length === 0) return;
     const pdfs = Array.from(list).filter(
       (file) =>
         file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"),
     );
-    if (pdfs.length > 0) uploadDocs.mutate(pdfs);
+    if (pdfs.length > 0) {
+      if (chatId) uploadDocs.mutate(pdfs);
+      else onStageFiles?.(pdfs);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
