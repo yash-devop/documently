@@ -58,7 +58,7 @@ pnpm --filter web lint
 pnpm --filter server check-types
 ```
 
-Requires: Node >= 24, pnpm 11. Env files: `apps/server/.env.local` (also feeds `docker compose --env-file`), `apps/worker/.env.local`, `apps/web/.env`. `.env.example` files exist in `apps/server` for the required vars.
+Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `docker compose --env-file`), `apps/worker/.env.local`, `apps/web/.env`. `.env.example` files exist in `apps/server` for the required vars.
 
 ## Architecture & data flow
 
