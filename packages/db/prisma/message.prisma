@@ -10,7 +10,7 @@ model ChatMessage {
   role    MessageRole
   message String      @default("")
 
-  chats Chat @relation(fields: [chatId], references: [id])
+  chats Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
