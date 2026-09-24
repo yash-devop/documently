@@ -7,7 +7,7 @@ export const loadTransformer = () => {
   if (!transformer) {
     transformer = pipeline(
       "feature-extraction",
-      "BAAI/bge-small-en-v1.5",
+      "Xenova/all-MiniLM-L6-v2",
       { dtype: "q8" },
     ).catch((error: unknown) => {
       transformer = null;
