@@ -18,26 +18,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: chat, isLoading } = useChat(id);
+  return <ChatContentView chatId={id} />;
+}
+
+function ChatContentView({ chatId }: { chatId: string }) {
+  const { data: chat, isLoading } = useChat(chatId);
   const {
     data: messages,
     isLoading: isLoadingMessages,
     isError: isMessagesError,
     isFetching: isFetchingMessages,
     refetch: refetchMessages,
-  } = useMessages(id);
+  } = useMessages(chatId);
   const { isMobile, state } = useSidebar();
   const [value, setValue] = useState("");
-  const { data: documents = [] } = useDocuments(id);
+  const { data: documents = [] } = useDocuments(chatId);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomObserverRef = useRef<IntersectionObserver | null>(null);
   const atBottomRef = useRef(true);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-
-  useEffect(() => {
-    atBottomRef.current = true;
-    setShowScrollToBottom(false);
-  }, [id]);
 
   const setBottomSentinel = useCallback((node: HTMLDivElement | null) => {
     const prev = bottomObserverRef.current;
@@ -83,7 +82,7 @@ export default function ChatPage() {
     mutate: sendMessage,
     isPending: isSending,
     variables: sendVariables,
-  } = useSendMessage(id);
+  } = useSendMessage(chatId);
 
   const handleSubmit = () => {
     const message = value.trim();
@@ -123,7 +122,7 @@ export default function ChatPage() {
             (chat?.title ?? "Untitled chat")
           )}
         </span>
-        <ChatDocuments chatId={id} documents={documents} />
+        <ChatDocuments chatId={chatId} documents={documents} />
       </div>
       <div className="flex flex-1 flex-col overflow-hidden pt-12">
         <DocumentStatusBanner documents={documents} />
@@ -184,7 +183,7 @@ export default function ChatPage() {
                 </Button>
               )}
               <ChatComposer
-                chatId={id}
+                chatId={chatId}
                 value={value}
                 onChange={setValue}
                 onSubmit={handleSubmit}
