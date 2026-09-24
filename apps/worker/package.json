@@ -5,24 +5,33 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "set NODE_ENV=development&& tsx watch src/index.ts"
+    "check-types": "tsc --noEmit",
+    "dev": "cross-env NODE_ENV=development tsup --watch --onSuccess \"node dist/index.mjs\"",
+    "build": "tsup",
+    "start": "cross-env NODE_ENV=production node dist/index.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1126.0",
+    "@aws-sdk/s3-request-presigner": "^3.1126.0",
+    "@huggingface/transformers": "^4.2.0",
     "@langchain/textsplitters": "^1.0.1",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "7.10.0",
     "@repo/db": "workspace:^",
     "@repo/embeddings": "workspace:^",
     "@repo/env": "workspace:^",
     "@repo/utils": "workspace:^",
     "bullmq": "^6.3.4",
+    "cross-env": "^7.0.3",
     "dotenv": "^17.4.2",
     "ioredis": "^6.0.0",
-    "pdf-parse": "^2.4.5",
-    "tsx": "^4.23.12"
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:^"
+    "@repo/typescript-config": "workspace:^",
+    "tsup": "^8.0.0"
   }
 }

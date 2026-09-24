@@ -14,6 +14,5 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api", VersionRouter);
 app.use(errorMiddleware);
 app.listen(8000, async () => {
-  console.log("serverEnv", serverEnv);
-  console.log("Server successfully");
+  console.log("Server 1 successfully");
 });

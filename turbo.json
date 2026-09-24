@@ -5,13 +5,30 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+      "outputs": [".next/**", "dist/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"],
+      "env": [
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_FRONTEND_URL",
+        "DATABASE_URL",
+        "NODE_ENV",
+        "BETTER_AUTH_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_API_KEY",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_API_KEY",
+        "FRONTEND_URL"
+      ]
     },
     "dev": {
       "cache": false,

@@ -35,8 +35,9 @@ Run from the repo root:
 
 ```sh
 pnpm install
-pnpm dev            # turbo dev (web + server + worker)
-pnpm build
+pnpm dev            # turbo dev (web next dev; server/worker tsup --watch → node dist/index.mjs)
+pnpm build          # turbo build (web next build; server/worker tsup bundle to dist/)
+pnpm start          # turbo start (prod runners: web next start; server/worker node dist/index.mjs; requires .env.production files + build)
 pnpm lint           # turbo lint
 pnpm check-types    # turbo check-types
 pnpm format         # prettier over ts/tsx/md
