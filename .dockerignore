@@ -12,3 +12,4 @@ pnpm-debug.log*
 **/.env.*
 **/env.example
 .cache
+*.md
