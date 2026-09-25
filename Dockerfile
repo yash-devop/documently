@@ -1,4 +1,4 @@
-FROM node:22-slim as builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ COPY . .
 RUN pnpm turbo run build --filter=server --filter=worker
 
 
-FROM node:22-slim AS PROD
+FROM node:22-slim AS prod
 
 WORKDIR /app
 
