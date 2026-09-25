@@ -23,7 +23,7 @@ export const auth = betterAuth({
       clientSecret: serverEnv.GITHUB_API_KEY,
     },
   },
-  trustedOrigins: ["http://localhost:3000"],
+  trustedOrigins: [serverEnv.FRONTEND_URL],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,

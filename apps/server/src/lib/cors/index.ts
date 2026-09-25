@@ -1,6 +1,7 @@
+import { serverEnv } from "@repo/env/serverEnv";
 import { CorsOptions } from "cors";
 
 export const corsConfig: CorsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: [serverEnv.FRONTEND_URL],
   credentials: true,
 };
