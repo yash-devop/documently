@@ -285,6 +285,75 @@ Alternatively host the web app on **Vercel** — set `NEXT_PUBLIC_BACKEND_URL` a
 
 ---
 
+# Email verification
+
+Sign-up is gated on a verified address (`emailAndPassword.requireEmailVerification`).
+Mail goes out over Gmail's SMTP server.
+
+## Env vars
+
+Add both to `.env.local` and `.env.production` (examples already contain them):
+
+```sh
+SMTP_USER=you@gmail.com
+SMTP_PASS=your-16-char-app-password
+```
+
+- `SMTP_USER` — the Google account that sends the mail. It is also the From
+  address, because Gmail rejects any sender that is not the authenticated
+  account or one of its aliases.
+- `SMTP_PASS` — an **App Password**, not the account password. Enable 2FA, then
+  create one at <https://myaccount.google.com/apppasswords> and paste it with
+  the spaces removed. Ordinary passwords are refused by Gmail.
+- **Without credentials in development** the server does not error: it logs the
+  whole email, including the verification link, to the API console. Use that to
+  test the flow without touching a mail account at all.
+- **In production missing credentials throw** when the first verification mail
+  is requested. Set them before deploying or signup will break.
+- Transport is hardcoded to `smtp.gmail.com:465` with implicit TLS. That caps
+  you at roughly 500 sends/day and ties the From address to a `@gmail.com`
+  account, which is fine for a beta but should move to SES/Brevo/Mailgun before
+  a public launch.
+
+## How the flow behaves
+
+This trips people up, so it is worth knowing:
+
+1. `POST /api/auth/sign-up/email` returns the user but **no session cookie** —
+   better-auth always skips auto sign-in when verification is required.
+2. The web app redirects to `/verify-email?email=...`. That screen must not
+   require a session, because the visitor has none yet.
+3. `POST /api/auth/send-verification-email` works with or without a session and
+   always returns `200`, whether or not the address exists. That is deliberate —
+   it stops the endpoint being used to discover which emails have accounts.
+4. Clicking the emailed link hits `/api/auth/verify-email`, which flips
+   `emailVerified` and (via `autoSignInAfterVerification`) issues a session.
+5. `authMiddleware` returns `403` `EMAIL_NOT_VERIFIED` for any protected API
+   call made with a session whose email is unverified.
+
+> Existing users keep sessions from before this was switched on, so some will
+> suddenly get `403` until they verify. The `/verify-email` screen handles the
+> resend, and resending works without a session.
+
+## Testing it locally
+
+1. Leave `SMTP_USER` and `SMTP_PASS` empty in `.env.local` and run `pnpm dev`.
+2. Sign up at `http://localhost:3000/signup`.
+3. Copy the verification link out of the API console.
+4. Open it. You should land on `/dashboard` already signed in.
+5. Confirm a protected route works: `curl -i http://localhost:8000/api/v1/chats`
+   with your cookie returns `200`.
+
+To confirm the API gate itself, flip the flag directly in the database and call
+a protected route with the same session — you should get `403`:
+
+```sh
+docker exec -i documently_db psql -U postgres -d documently_db -tA \
+  <<< 'UPDATE "user" SET "emailVerified" = false WHERE email = '\''you@example.com'\'''
+```
+
+---
+
 # Troubleshooting
 
 ### `Cannot resolve environment variable: DATABASE_URL`
