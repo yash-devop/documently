@@ -1,10 +1,9 @@
 import { config } from "dotenv";
 import { z } from "zod";
 
-config({
-  path:
-    process.env.NODE_ENV === "development" ? ".env.local" : ".env.production",
-});
+import { resolveEnvFile } from "./resolve-env-file.js";
+
+config({ path: await resolveEnvFile() });
 
 const workerEnvSchema = z.object({
   DATABASE_URL: z.url(),

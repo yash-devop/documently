@@ -1,1 +1,1 @@
-export * from "./worker-env";
+export * from "./worker-env.js";
