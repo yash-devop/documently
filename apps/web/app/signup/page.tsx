@@ -97,11 +97,13 @@ export default function LoginPage() {
         toast({
           type: "success",
           title: "Account created successfully",
-          description: `Welcome to Documently,  ${data.user.name ?? data.user.email ?? "User"}! Your account is ready to use.`,
+          description: `Welcome to Documently,  ${data.user.name ?? data.user.email ?? "User"}! Check your inbox to verify your email.`,
         });
 
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push(
+            `/verify-email?email=${encodeURIComponent(values.email)}`,
+          );
         }, 999);
       }
     } finally {

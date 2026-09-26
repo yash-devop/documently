@@ -69,6 +69,22 @@ export default function LoginPage() {
       });
 
       if (error) {
+        // better-auth refuses sign-in for unverified accounts (403
+        // EMAIL_NOT_VERIFIED). Send them to the resend screen instead of
+        // showing a dead-end error.
+        if (error.code === "EMAIL_NOT_VERIFIED") {
+          toast({
+            type: "error",
+            title: "Email not verified",
+            description: "Check your inbox for the verification link.",
+          });
+
+          router.push(
+            `/verify-email?email=${encodeURIComponent(values.email)}`,
+          );
+          return;
+        }
+
         console.log("Err", error);
         console.log("data", data);
         toast({
