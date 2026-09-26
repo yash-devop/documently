@@ -4,6 +4,7 @@ import { prisma } from "@repo/db";
 import { serverEnv } from "@repo/env/serverEnv";
 import { sendEmail } from "../mail";
 import { verificationEmail, withFrontendCallback } from "../mail/templates";
+import { allowedOrigins } from "../cors";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -29,7 +30,7 @@ export const auth = betterAuth({
       requireLocalEmailVerified: true,
     },
   },
-  trustedOrigins: [serverEnv.NEXT_PUBLIC_FRONTEND_URL],
+  trustedOrigins: allowedOrigins,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
