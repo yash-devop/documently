@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { config } from "dotenv";
 
-config({
-  path:
-    process.env.NODE_ENV === "development" ? ".env.local" : ".env.production",
-});
+import { resolveEnvFile } from "./resolve-env-file.js";
+
+config({ path: await resolveEnvFile() });
 
 const awsEnvSchema = z.object({
   AWS_REGION: z.string(),

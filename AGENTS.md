@@ -23,7 +23,7 @@ pnpm workspaces + Turborepo. `apps/*` and `packages/*`.
 
 - `packages/ui` — shadcn/ui components (base-ui based) + shared hooks. **Source of truth for all UI components.** Exports from `src/index.tsx`; components live in `src/components/ui/`, hooks in `src/hooks/`.
 - `packages/db` — Prisma 7 client. Multi-file schema in `packages/db/prisma/*.prisma` (split: chat, chunk, document, message, schema). Client generated to `packages/db/generated/prisma`. Exports `prisma` and `Prisma` from `packages/db/client.ts`.
-- `packages/env` — zod-validated env for each target: `serverEnv`, `workerEnv`, `awsEnv`. Loads `.env.local` (dev) or `.env.production` (prod).
+- `packages/env` — zod-validated env for each target: `serverEnv`, `workerEnv`, `awsEnv`, plus a shared `resolveEnvFile()` used by all three (and by the Prisma config) to locate the repo-root env file.
 - `packages/embeddings` — `getEmbeddings()` (transformer-based, 384-dim vectors, loaded quantized `dtype: "q8"`), plus `RetryableError`/`NonRetryableError`.
 - `packages/schemas` — shared zod schemas + inferred types (`attachDocumentSchema`, `ChatPayload`, etc.).
 - `packages/utils` — S3 helpers (`uploadToS3`, `downloadFromS3`, `deleteFileFromS3`, `getPresignedUrl`).
@@ -37,18 +37,21 @@ Run from the repo root:
 pnpm install
 pnpm dev            # turbo dev (web next dev; server/worker tsup --watch → node dist/index.mjs)
 pnpm build          # turbo build (web next build; server/worker tsup bundle to dist/)
-pnpm start          # turbo start (prod runners: web next start; server/worker node dist/index.mjs; requires .env.production files + build)
+pnpm start          # turbo start (prod runners: web next start; server/worker node dist/index.mjs; needs a prior build)
 pnpm lint           # turbo lint
 pnpm check-types    # turbo check-types
 pnpm format         # prettier over ts/tsx/md
 
-pnpm compose:up     # Postgres (pgvector:pg17) + Redis via docker compose
+pnpm compose:infra  # only db + redis (use this for local dev)
+pnpm compose:up     # all services in Docker, NODE_ENV=production
+pnpm compose:up:dev # all services in Docker, NODE_ENV=development (verbose Prisma errors)
+pnpm compose:up:prod
 pnpm compose:down
 
 pnpm prisma:generate
-pnpm prisma:dev     # db push (dev)
-pnpm prisma:prod    # migrate deploy (prod)
-pnpm prisma:reset
+pnpm prisma:dev     # db push, pinned to .env.local
+pnpm prisma:prod    # migrate deploy, pinned to .env.production (run on EC2 before restarting new code)
+pnpm prisma:reset   # destructive
 ```
 
 Per-app (faster for iteration):
@@ -59,7 +62,9 @@ pnpm --filter web lint
 pnpm --filter server check-types
 ```
 
-Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `docker compose --env-file`), `apps/worker/.env.local`, `apps/web/.env`. `.env.example` files exist in `apps/server` for the required vars.
+Requires: Node >= 22, pnpm 9. Env files live in the **repo root** (gitignored): `.env.local` (dev) and `.env.production` (prod), plus `apps/web/.env` for the two client vars. Templates: `.env.local.example`, `.env.production.example`. `packages/env` locates them with `find-up` walking up from `process.cwd()`, choosing the file by `NODE_ENV`.
+
+Local dev uses Docker for **only** db + redis (`pnpm compose:infra`); server/worker/web run on the host via `pnpm dev`. Never run `compose:up` together with `pnpm dev` — both bind port 8000 and both workers poll the same BullMQ queue.
 
 ## Architecture & data flow
 
@@ -118,4 +123,4 @@ Requires: Node >= 22, pnpm 9. Env files: `apps/server/.env.local` (also feeds `d
 ## Docs
 
 - Long-form reference and decision records live in `docs/`, not here. Keep this file as the short always-on index.
-- Deployment plan, hosting verdict, and accepted trade-offs → `docs/DEPLOYMENT.md`.
+- Local dev, local production testing, EC2 deploy, and troubleshooting → `docs/DEPLOYMENT.md` (start here).

@@ -1,10 +1,7 @@
 import { betterAuth, BetterAuthOptions } from "better-auth";
-serverEnv;
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@repo/db";
 import { serverEnv } from "@repo/env/serverEnv";
-
-console.log("AUTHHH", serverEnv);
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -23,7 +20,7 @@ export const auth = betterAuth({
       clientSecret: serverEnv.GITHUB_API_KEY,
     },
   },
-  trustedOrigins: [serverEnv.FRONTEND_URL],
+  trustedOrigins: [serverEnv.NEXT_PUBLIC_FRONTEND_URL],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,

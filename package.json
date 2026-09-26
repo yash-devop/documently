@@ -8,15 +8,19 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "compose:up": "docker compose --env-file apps/server/.env.local up -d",
+    "compose:up": "docker compose --env-file .env.local up -d",
+    "compose:up:dev": "cross-env NODE_ENV=development docker compose --env-file .env.local up -d",
+    "compose:up:prod": "docker compose --env-file .env.production up -d",
+    "compose:infra": "docker compose --env-file .env.local up -d db redis",
     "compose:down": "docker compose down",
-    "prisma:generate": "cd packages/db && pnpm prisma generate --config=prisma7.config.ts",
-    "prisma:format": "cd packages/db && pnpm prisma format --config=prisma7.config.ts",
-    "prisma:prod": "cd packages/db && pnpm prisma migrate deploy --config=prisma7.config.ts",
-    "prisma:dev": "cd packages/db && pnpm prisma db push --config=prisma7.config.ts",
-    "prisma:reset": "cd packages/db && pnpm prisma migrate reset --config=prisma7.config.ts"
+    "prisma:generate": "cross-env NODE_ENV=development pnpm --filter @repo/db exec prisma generate --config=prisma7.config.ts",
+    "prisma:format": "cross-env NODE_ENV=development pnpm --filter @repo/db exec prisma format --config=prisma7.config.ts",
+    "prisma:prod": "cross-env NODE_ENV=production pnpm --filter @repo/db exec prisma migrate deploy --config=prisma7.config.ts",
+    "prisma:dev": "cross-env NODE_ENV=development pnpm --filter @repo/db exec prisma db push --config=prisma7.config.ts",
+    "prisma:reset": "cross-env NODE_ENV=development pnpm --filter @repo/db exec prisma migrate reset --config=prisma7.config.ts"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "prettier": "3.9.6",
     "turbo": "^2.10.12",
     "typescript": "7.0.2"

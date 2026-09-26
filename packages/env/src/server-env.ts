@@ -1,10 +1,9 @@
 import { config } from "dotenv";
 import { z } from "zod";
 
-config({
-  path:
-    process.env.NODE_ENV === "development" ? ".env.local" : ".env.production",
-});
+import { resolveEnvFile } from "./resolve-env-file.js";
+
+config({ path: await resolveEnvFile() });
 
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -14,7 +13,7 @@ const serverEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string(),
 
-  FRONTEND_URL: z.string(),
+  NEXT_PUBLIC_FRONTEND_URL: z.string(),
 
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_API_KEY: z.string(),
@@ -39,7 +38,7 @@ export const serverEnv = serverEnvSchema.parse({
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
 
-  FRONTEND_URL: process.env.FRONTEND_URL,
+  NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
 
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
