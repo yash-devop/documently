@@ -19,6 +19,21 @@ export const authMiddleware = async (
         message: "Unauthorized Access",
       });
     }
+
+    // A valid session is not enough: unverified users must not read or write
+    // data. The /verify-email UI redirects them, and this closes the door on
+    // anyone calling the API directly with their session token.
+    if (!session.user.emailVerified) {
+      return res.status(403).json({
+        status: 403,
+        message: "Email not verified",
+        error: {
+          code: "EMAIL_NOT_VERIFIED",
+          message: "Verify your email address to continue",
+        },
+      });
+    }
+
     req.user = session.user;
     req.session = session.session;
     next();

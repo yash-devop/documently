@@ -29,6 +29,12 @@ const serverEnvSchema = z.object({
   AWS_S3_BUCKET: z.string(),
 
   REDIS_URL: z.url(),
+
+  // Optional: with no credentials the mail module logs emails to the console
+  // instead of sending them, so local dev needs no mail account. In production
+  // missing credentials are a hard error rather than a silent no-op.
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
 });
 
 export const serverEnv = serverEnvSchema.parse({
@@ -54,4 +60,7 @@ export const serverEnv = serverEnvSchema.parse({
   AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
   REDIS_URL: process.env.REDIS_URL,
+
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
 });
