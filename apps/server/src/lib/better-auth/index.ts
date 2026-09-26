@@ -2,6 +2,8 @@ import { betterAuth, BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@repo/db";
 import { serverEnv } from "@repo/env/serverEnv";
+import { sendEmail } from "../mail";
+import { verificationEmail, withFrontendCallback } from "../mail/templates";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -20,10 +22,31 @@ export const auth = betterAuth({
       clientSecret: serverEnv.GITHUB_API_KEY,
     },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "github"],
+      requireLocalEmailVerified: true,
+    },
+  },
   trustedOrigins: [serverEnv.NEXT_PUBLIC_FRONTEND_URL],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    // Sends on sign-up and on every resend, since better-auth routes both
+    // through this one callback.
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const { subject, text, html } = verificationEmail(
+        withFrontendCallback(url),
+      );
+      await sendEmail({ to: user.email, subject, text, html });
+    },
+    // Land the user in the app once the link is clicked.
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60,
   },
   advanced: {
     defaultCookieAttributes: {
