@@ -11,12 +11,6 @@ export interface ChatMessage {
   updatedAt: string;
 }
 
-export interface SendMessageResult {
-  chatMessage: ChatMessage;
-  contextString: string;
-  llmresponse: string;
-}
-
 export interface StreamMessageResult {
   chatMessage: ChatMessage;
   assistantMessage: ChatMessage;
@@ -37,13 +31,10 @@ export async function getMessages(chatId: string) {
   return data.data;
 }
 
-export async function sendMessage(chatId: string, message: string) {
-  const { data } = await api.post<ApiResponse<SendMessageResult>>(
-    `/chats/${chatId}/messages`,
-    { message },
-  );
-  return data;
-}
+// Every send goes through streamMessage. The blocking POST /chats/:id/messages
+// endpoint holds one request open for the whole Gemini generation, which
+// outlasts the default 60s proxy read timeout and returns a 504, so it is
+// deliberately not wrapped here.
 
 export async function streamMessage(
   chatId: string,

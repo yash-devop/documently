@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { IconLoader2 } from "@tabler/icons-react";
 import { SidebarTrigger, useSidebar } from "@repo/ui";
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatWelcome } from "@/components/chat/chat-welcome";
@@ -10,10 +11,14 @@ import { NewChatDocuments } from "@/components/chat/new-chat-documents";
 import { PromptSuggestions } from "@/components/chat/prompt-suggestions";
 import { useCreateChat } from "@/hooks/chats/use-create-chat";
 import { getApiError } from "@/lib/axios";
-import { attachDocument, uploadDocuments } from "@/lib/query/api/documents";
-import { sendMessage } from "@/lib/query/api/messages";
+import { stashPendingPrompt } from "@/lib/pending-prompt";
+import {
+  attachDocument,
+  type ChatDocument,
+  uploadDocuments,
+  waitForDocumentsReady,
+} from "@/lib/query/api/documents";
 import { queryKeys } from "@/lib/query/keys";
-import { withMinDelay } from "@/lib/with-min-delay";
 import { toast } from "@/components/toasts/index";
 
 const suggestions = [
@@ -22,30 +27,51 @@ const suggestions = [
   "Draft a follow-up email",
 ];
 
+type SubmitPhase = { label: string; pending: number } | null;
+
 export default function DashboardPage() {
   const router = useRouter();
   const { isMobile, state } = useSidebar();
   const [value, setValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [libraryIds, setLibraryIds] = useState<string[]>([]);
+  const [phase, setPhase] = useState<SubmitPhase>(null);
+  const isSubmitting = phase !== null;
   const createChat = useCreateChat();
   const queryClient = useQueryClient();
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const handleSubmit = async () => {
     const prompt = value.trim();
-    if (!prompt) return;
+    if (!prompt || isSubmitting) return;
     setValue("");
+    setPhase({ label: "Creating chat...", pending: 0 });
     try {
       const chat = await createChat.mutateAsync("Untitled chat");
 
       if (files.length > 0) {
+        setPhase({ label: "Uploading documents...", pending: 0 });
         try {
           await uploadDocuments(chat.id, files);
         } catch (error) {
+          // The chat already exists, so abandon it here rather than sending a
+          // message that has no documents to ground it in.
           toast({ title: getApiError(error).message, type: "error" });
+          setValue((current) => (current.trim() ? current : prompt));
+          router.replace(`/dashboard/chats/${chat.id}`);
+          return;
         }
       }
+
       if (libraryIds.length > 0) {
+        setPhase({ label: "Attaching documents...", pending: 0 });
         const results = await Promise.allSettled(
           libraryIds.map((id) => attachDocument(chat.id, id)),
         );
@@ -55,18 +81,50 @@ export default function DashboardPage() {
           }
         }
       }
+
+      // Retrieval only sees READY documents, and the upload above resolved on
+      // enqueue rather than on completion. Hold here until the worker has
+      // actually indexed everything, or the first answer has no context to
+      // ground itself in and the model refuses to answer.
+      let documents: ChatDocument[] = [];
+      if (files.length > 0) {
+        setPhase({ label: "Indexing documents...", pending: 0 });
+        documents = await waitForDocumentsReady(chat.id, {
+          onPendingChange: (pending) => {
+            if (!mountedRef.current) return;
+            setPhase({ label: "Indexing documents...", pending });
+          },
+        });
+      }
+
       await queryClient.invalidateQueries({
         queryKey: queryKeys.chats.documents(chat.id),
       });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.documents.all() });
-
-      await withMinDelay(sendMessage(chat.id, prompt));
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.chats.messages(chat.id),
+        queryKey: queryKeys.documents.all(),
       });
-      router.push(`/dashboard/chats/${chat.id}`);
-    } catch {
-      setValue((current) => (current.trim() ? current : prompt));
+
+      const failed = documents.filter((doc) => doc.status === "FAILED").length;
+      if (failed > 0) {
+        toast({
+          title: `${failed} document${failed > 1 ? "s" : ""} failed to process`,
+          description: "The answer may be missing those documents.",
+          type: "error",
+        });
+      }
+
+      setPhase({ label: "Opening chat...", pending: 0 });
+      stashPendingPrompt(chat.id, prompt);
+      // replace, not push: Back should not return to a welcome screen whose
+      // composer and staged files are already gone.
+      router.replace(`/dashboard/chats/${chat.id}`);
+    } catch (error) {
+      if (mountedRef.current) {
+        setValue((current) => (current.trim() ? current : prompt));
+        toast({ title: getApiError(error).message, type: "error" });
+      }
+    } finally {
+      if (mountedRef.current) setPhase(null);
     }
   };
 
@@ -88,6 +146,22 @@ export default function DashboardPage() {
             onLibraryIdsChange={setLibraryIds}
           />
         </div>
+
+        {phase && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center justify-center gap-2 text-xs text-foreground-light"
+          >
+            <IconLoader2 className="size-3.5 animate-spin" />
+            <span>{phase.label}</span>
+            {phase.pending > 0 && (
+              <span className="text-foreground-lighter">
+                {phase.pending} remaining
+              </span>
+            )}
+          </div>
+        )}
 
         <ChatComposer
           value={value}

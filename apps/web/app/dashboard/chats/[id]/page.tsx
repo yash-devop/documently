@@ -11,6 +11,7 @@ import { useDocuments } from "@/hooks/chats/use-documents";
 import { useMessages } from "@/hooks/chats/use-messages";
 import { useSendMessage } from "@/hooks/chats/use-send-message";
 import { cn } from "@/lib/cn";
+import { takePendingPrompt } from "@/lib/pending-prompt";
 import { IconArrowDown } from "@tabler/icons-react";
 import { Button, Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
 import { useParams } from "next/navigation";
@@ -100,6 +101,17 @@ function ChatContentView({ chatId }: { chatId: string }) {
       }
     });
   };
+
+  // A brand new chat is created by the welcome screen, which parks the first
+  // prompt for us. Send it from here so it streams like every other message
+  // instead of going out as one blocking request. Gated on the history load
+  // finishing: useSendMessage seeds its optimistic bubbles from the cached
+  // list, and an in-flight fetch would land after it and wipe them out.
+  useEffect(() => {
+    if (isLoadingMessages) return;
+    const pending = takePendingPrompt(chatId);
+    if (pending) sendMessage(pending);
+  }, [chatId, isLoadingMessages, sendMessage]);
 
   return (
     <div className="flex h-dvh flex-1 flex-col pt-10">
