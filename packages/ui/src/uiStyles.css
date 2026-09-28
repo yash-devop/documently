@@ -119,6 +119,31 @@
   --text-xxs--line-height: 1rem;
 }
 
+/* Motion tokens.
+ *
+ * These live in a plain `:root` rather than `@theme` on purpose. Tailwind v4
+ * tree-shakes `@theme` entries and only emits a custom `--duration-*` when it
+ * has already generated a matching `duration-*` utility for it, so a custom
+ * duration silently never reaches the stylesheet. A plain `:root` is always
+ * emitted. Consume these with explicit arbitrary values —
+ * `duration-[var(--duration-ui)]` — rather than relying on namespace
+ * inference.
+ *
+ * Named curves rather than the built-in `ease` / `ease-out`, which are too weak
+ * to read as deliberate. `ease-in` is deliberately absent from the palette: it
+ * delays the moment the user is watching and reads as sluggish on UI. */
+@layer base {
+  :root {
+    --ease-out-ui: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out-ui: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+    --duration-fast: 160ms;
+    --duration-ui: 200ms;
+    --duration-reveal: 420ms;
+  }
+}
+
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
