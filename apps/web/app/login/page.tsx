@@ -47,7 +47,7 @@ export default function LoginPage() {
   const handleGoogle = async () => {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}`,
+      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard`,
       errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`,
     });
   };
@@ -55,7 +55,7 @@ export default function LoginPage() {
   const handleGithub = async () => {
     await authClient.signIn.social({
       provider: "github",
-      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}`,
+      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard`,
       errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`,
     });
   };
