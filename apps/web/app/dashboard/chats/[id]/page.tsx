@@ -17,6 +17,18 @@ import { Button, Retry, SidebarTrigger, Skeleton, useSidebar } from "@repo/ui";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+/** How close to the bottom still counts as "at the bottom". Without a
+ *  tolerance, sub-pixel growth while an answer streams reads as the user
+ *  scrolling up and kills autoscroll mid-sentence. */
+const BOTTOM_TOLERANCE_PX = 48;
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
   return <ChatContentView chatId={id} />;
@@ -35,50 +47,63 @@ function ChatContentView({ chatId }: { chatId: string }) {
   const [value, setValue] = useState("");
   const { data: documents = [] } = useDocuments(chatId);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const bottomObserverRef = useRef<IntersectionObserver | null>(null);
-  const atBottomRef = useRef(true);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
-  const setBottomSentinel = useCallback((node: HTMLDivElement | null) => {
-    const prev = bottomObserverRef.current;
-    prev?.disconnect();
-    bottomObserverRef.current = null;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const isAtBottom = entry?.isIntersecting ?? false;
-        atBottomRef.current = isAtBottom;
-        setShowScrollToBottom(!isAtBottom);
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -10px 0px" },
-    );
-    observer.observe(node);
-    bottomObserverRef.current = observer;
-  }, []);
-
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
     const el = scrollRef.current;
-    if (el) {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-      atBottomRef.current = true;
-      setShowScrollToBottom(false);
-    }
-  };
-
-  useEffect(() => {
-    return () => bottomObserverRef.current?.disconnect();
+    if (!el) return;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: prefersReducedMotion() ? "auto" : behavior,
+    });
+    stickToBottomRef.current = true;
+    setShowScrollToBottom(false);
   }, []);
 
+  // Single source of truth for "is the user parked at the bottom". The old
+  // IntersectionObserver sentinel flipped to false the moment a streaming
+  // answer grew past it, which is exactly when autoscroll is most needed.
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.clientHeight - el.scrollTop;
+    const atBottom = distance <= BOTTOM_TOLERANCE_PX;
+    stickToBottomRef.current = atBottom;
+    setShowScrollToBottom(!atBottom);
+  }, []);
+
+  // Pin on any content growth, not just a new `messages` array. Streaming
+  // tokens, markdown tables, and late font metrics all change the content
+  // height while the array identity stays the same, so keying off `messages`
+  // alone left the view behind mid-answer.
   useEffect(() => {
-    if (messages && messages.length > 0 && atBottomRef.current) {
-      requestAnimationFrame(() => {
-        const el = scrollRef.current;
-        if (el && el.scrollHeight - el.clientHeight > 0) {
-          el.scrollTo({ top: el.scrollHeight });
-        }
-      });
-    }
-  }, [messages]);
+    const content = contentRef.current;
+    if (!content) return;
+    const pin = () => {
+      const el = scrollRef.current;
+      if (!el || !stickToBottomRef.current) return;
+      el.scrollTop = el.scrollHeight;
+    };
+    const observer = new ResizeObserver(pin);
+    observer.observe(content);
+    // Container resizes (viewport change) don't resize the content, so watch
+    // those separately to keep the last message in view.
+    window.addEventListener("resize", pin);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", pin);
+    };
+  }, []);
+
+  // Land at the newest message once history arrives, without animating past the
+  // whole conversation on load.
+  useEffect(() => {
+    if (isLoadingMessages) return;
+    scrollToBottom("auto");
+  }, [chatId, isLoadingMessages, scrollToBottom]);
+
   const {
     mutate: sendMessage,
     isPending: isSending,
@@ -94,12 +119,8 @@ function ChatContentView({ chatId }: { chatId: string }) {
         setValue((current) => (current.trim() ? current : message));
       },
     });
-    requestAnimationFrame(() => {
-      const el = scrollRef.current;
-      if (el && el.scrollHeight - el.clientHeight > 0) {
-        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-      }
-    });
+    // The optimistic bubble grows the content, which the ResizeObserver picks
+    // up and pins on its own.
   };
 
   // A brand new chat is created by the welcome screen, which parks the first
@@ -114,10 +135,10 @@ function ChatContentView({ chatId }: { chatId: string }) {
   }, [chatId, isLoadingMessages, sendMessage]);
 
   return (
-    <div className="flex h-dvh flex-1 flex-col pt-10">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
       <div
         className={cn(
-          "fixed inset-x-0 top-0 z-10 flex h-12 items-center gap-2 border-b border-border-lighter bg-background px-4",
+          "fixed inset-x-0 top-0 z-20 flex h-12 items-center gap-2 border-b border-border-lighter bg-background px-4",
           !isMobile &&
             (state === "expanded"
               ? "md:left-[var(--sidebar-width)]"
@@ -136,71 +157,81 @@ function ChatContentView({ chatId }: { chatId: string }) {
         </span>
         <ChatDocuments chatId={chatId} documents={documents} />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden pt-12">
+
+      {/* `h-0` + `flex-1` is the idiom for a flex-column child that fills the
+          remaining space but is never sized by its own content, so the message
+          area scrolls internally instead of growing the page. */}
+      <div className="relative flex min-h-0 flex-1 flex-col pt-12">
         <DocumentStatusBanner documents={documents} />
         <div
           ref={scrollRef}
-          className="no-scrollbar mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-4 overflow-y-auto px-4 pb-28"
+          onScroll={handleScroll}
+          className="no-scrollbar h-0 min-h-0 w-full flex-1 overflow-y-auto overscroll-contain"
         >
-          {isMessagesError ? (
-            <div className="flex items-center justify-center h-full">
-              <Retry
-                message="Something went wrong while loading messages."
-                retrying={isFetchingMessages}
-                onRetry={() => refetchMessages()}
-              />
-            </div>
-          ) : isLoadingMessages ? (
-            <MessagesSkeleton />
-          ) : messages && messages.length === 0 ? (
-            <ChatWelcome />
-          ) : (
-            messages?.map((message) => (
-              <Message
-                key={message.id}
-                role={message.role === "USER" ? "user" : "assistant"}
-                pending={
-                  isSending &&
-                  message.id.startsWith("optimistic-") &&
-                  message.message === (sendVariables as string | undefined)
-                }
-              >
-                {message.message}
-              </Message>
-            ))
-          )}
-          <div ref={setBottomSentinel} className="h-px shrink-0" aria-hidden />
-        </div>
-        <div
-          className={cn(
-            "fixed inset-x-0 bottom-0 z-10 bg-background",
-            !isMobile &&
-              (state === "expanded"
-                ? "md:left-[var(--sidebar-width)]"
-                : "md:left-[var(--sidebar-width-icon)]"),
-          )}
-        >
-          <div className="flex justify-center p-4">
-            <div className="relative w-full max-w-2xl">
-              {showScrollToBottom && (
-                <Button
-                  type="button"
-                  onClick={scrollToBottom}
-                  aria-label="Scroll to bottom"
-                  variant="outline"
-                  size="icon"
-                  className="absolute -top-16 right-0 size-9 rounded-full border-border bg-background/80 shadow-lg backdrop-blur-sm"
+          <div
+            ref={contentRef}
+            className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pb-28 pt-8"
+          >
+            {isMessagesError ? (
+              <div className="flex min-h-[60vh] items-center justify-center">
+                <Retry
+                  message="Something went wrong while loading messages."
+                  retrying={isFetchingMessages}
+                  onRetry={() => refetchMessages()}
+                />
+              </div>
+            ) : isLoadingMessages ? (
+              <MessagesSkeleton />
+            ) : messages && messages.length === 0 ? (
+              <ChatWelcome />
+            ) : (
+              messages?.map((message) => (
+                <Message
+                  key={message.id}
+                  role={message.role === "USER" ? "user" : "assistant"}
+                  pending={
+                    isSending &&
+                    message.id.startsWith("optimistic-") &&
+                    message.message === (sendVariables as string | undefined)
+                  }
                 >
-                  <IconArrowDown className="size-5" />
-                </Button>
-              )}
-              <ChatComposer
-                chatId={chatId}
-                value={value}
-                onChange={setValue}
-                onSubmit={handleSubmit}
-              />
-            </div>
+                  {message.message}
+                </Message>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-20 bg-background",
+          !isMobile &&
+            (state === "expanded"
+              ? "md:left-[var(--sidebar-width)]"
+              : "md:left-[var(--sidebar-width-icon)]"),
+        )}
+      >
+        <div className="flex justify-center p-4">
+          <div className="relative w-full max-w-2xl">
+            {showScrollToBottom && (
+              <Button
+                type="button"
+                onClick={() => scrollToBottom()}
+                aria-label="Scroll to bottom"
+                variant="outline"
+                size="icon"
+                className="absolute -top-16 right-0 size-9 rounded-full border-border bg-background/80 shadow-lg backdrop-blur-sm"
+              >
+                <IconArrowDown className="size-5" />
+              </Button>
+            )}
+            <ChatComposer
+              chatId={chatId}
+              value={value}
+              onChange={setValue}
+              onSubmit={handleSubmit}
+            />
           </div>
         </div>
       </div>
