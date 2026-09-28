@@ -5,6 +5,7 @@
 
 @theme {
   --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
 
   --animate-shimmer: shimmer 1.6s linear infinite;
   @keyframes shimmer {
@@ -19,6 +20,66 @@
 
 @layer base {
   body {
-    @apply font-geist-sans;
+    @apply font-geist-sans bg-background text-foreground;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Clears the sticky header when jumping to a section anchor. */
+    scroll-padding-top: 6rem;
+  }
+}
+
+/* Hover effects are gated to devices that actually have a pointer, so touch
+   devices don't get a stuck hover state after a tap. Press feedback stays
+   ungated because it is a direct response to the user's own touch. */
+@utility interactive-surface {
+  transition:
+    transform var(--duration-fast) var(--ease-out-ui),
+    border-color var(--duration-fast) var(--ease-out-ui),
+    background-color var(--duration-fast) var(--ease-out-ui);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Faint dot grid used behind the hero. Masked to fade out before it reaches
+   the fold so it reads as texture rather than a visible pattern edge. */
+@utility dot-grid {
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-foreground-lighter) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 0%,
+    black 20%,
+    transparent 75%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Reveal animations all end in their visible state, so collapsing the
+     duration lands content instantly rather than hiding it. Transform-based
+     motion is additionally neutralised by Motion's `reducedMotion="user"`,
+     which keeps opacity (arrival is still communicated) and drops movement. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
   }
 }
