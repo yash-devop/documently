@@ -44,20 +44,31 @@ export default function LoginPage() {
   const [isPending, setIsPending] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
-  const handleGoogle = async () => {
-    await authClient.signIn.social({
-      provider: "google",
+  const handleSocial = async (provider: "google" | "github") => {
+    // Without this the button does nothing when the request is rejected (an
+    // untrusted callbackURL, a provider misconfiguration, a rate limit). The
+    // failure only ever surfaced as a blank click.
+    const { error } = await authClient.signIn.social({
+      provider,
       callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard`,
       errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`,
     });
+
+    if (error) {
+      toast({
+        type: "error",
+        title: `Could not sign in with ${provider}`,
+        description: error.message ?? error.statusText,
+      });
+    }
+  };
+
+  const handleGoogle = async () => {
+    await handleSocial("google");
   };
 
   const handleGithub = async () => {
-    await authClient.signIn.social({
-      provider: "github",
-      callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard`,
-      errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`,
-    });
+    await handleSocial("github");
   };
 
   const handleEmailLogin = async (values: LoginValues) => {
