@@ -200,48 +200,45 @@ export function AppSidebar() {
                           />
                         </form>
                       ) : (
-                        <>
-                          <SidebarMenuButton
-                            isActive={isActive}
-                            tooltip={chat.title}
-                            onClick={() =>
-                              router.push(`/dashboard/chats/${chat.id}`)
-                            }
-                          >
-                            <IconMessageCircle className={rowColor} />
-                            <span className={cn("truncate", rowColor)}>
-                              {chat.title}
-                            </span>
-                          </SidebarMenuButton>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              render={
-                                <SidebarMenuAction
-                                  showOnHover
-                                  aria-label={`Actions for ${chat.title}`}
-                                />
-                              }
-                            >
-                              <IconDots />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" side="right">
-                              <DropdownMenuItem
-                                onClick={() => startRename(chat)}
-                              >
-                                <IconPencil />
-                                Rename
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive!"
-                                onClick={() => handleDelete(chat)}
-                              >
-                                <IconTrash />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={chat.title}
+                          onClick={() =>
+                            router.push(`/dashboard/chats/${chat.id}`)
+                          }
+                        >
+                          <IconMessageCircle className={rowColor} />
+                          <span className={cn("truncate", rowColor)}>
+                            {chat.title}
+                          </span>
+                        </SidebarMenuButton>
                       )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <SidebarMenuAction
+                              showOnHover
+                              className={cn(isRenaming && "hidden")}
+                              aria-label={`Actions for ${chat.title}`}
+                            />
+                          }
+                        >
+                          <IconDots />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" side="right">
+                          <DropdownMenuItem onClick={() => startRename(chat)}>
+                            <IconPencil />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive!"
+                            onClick={() => handleDelete(chat)}
+                          >
+                            <IconTrash />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </SidebarMenuItem>
                   );
                 })
