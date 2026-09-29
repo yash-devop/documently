@@ -1,4 +1,4 @@
-import { prisma } from "@repo/db";
+import { Prisma, prisma } from "@repo/db";
 import { AppError } from "../../middlewares/error.middleware";
 
 export const ChatService = {
@@ -110,6 +110,9 @@ export const ChatService = {
       return { data, message: "Chat deleted successfully" };
     } catch (error) {
       if (error instanceof AppError) throw error;
+      if (error instanceof Prisma.Prisma.PrismaClientKnownRequestError) {
+        throw error;
+      }
       throw new AppError("Error while deleting chat", 400, "FAILED");
     }
   },
